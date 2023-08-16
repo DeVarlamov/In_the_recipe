@@ -1,10 +1,11 @@
 from djoser.serializers import UserCreateSerializer
 from rest_framework import serializers
 
-from .models import Following, User
+from .models import Subscribed, User
 
 
 class UserRegistrationSerializer(UserCreateSerializer):
+    """Сереалайзер регистрации"""
     class Meta(UserCreateSerializer.Meta):
         model = User
         fields = ('email',
@@ -17,7 +18,8 @@ class UserRegistrationSerializer(UserCreateSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    is_following = serializers.SerializerMethodField()
+    """Сереалайзер данных юзера"""
+    is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -26,14 +28,14 @@ class UserSerializer(serializers.ModelSerializer):
                   'username',
                   'first_name',
                   'last_name',
-                  'is_following',
+                  'is_subscribed',
                   )
 
-    def get_is_following(self, obj):
+    def get_is_subscribed(self, obj):
         user = self.context['request'].user
         if user.is_anonymous:
             return False
-        return Following.objects.filter(user=user, author=obj).exists()
+        return Subscribed.objects.filter(user=user, author=obj).exists()
 
 
 class FollowSerializer(serializers.ModelSerializer):
@@ -42,15 +44,15 @@ class FollowSerializer(serializers.ModelSerializer):
     username = serializers.ReadOnlyField(source='author.username')
     first_name = serializers.ReadOnlyField(source='author.first_name')
     last_name = serializers.ReadOnlyField(source='author.last_name')
-    is_following = serializers.SerializerMethodField()
+    is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
-        model = Following
+        model = Subscribed
         fields = ('id', 'email', 'username', 'first_name', 'last_name',
                   'is_following', 'recipes', 'recipes_count')
 
     def get_is_following(self, obj):
-        return Following.objects.filter(
+        return Subscribed.objects.filter(
             user=obj.user,
             author=obj.author,
         ).exists()

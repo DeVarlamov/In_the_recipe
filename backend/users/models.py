@@ -12,11 +12,11 @@ class User(AbstractUser):
         _('Ваш логин'),
         max_length=CHARACTER_LENGTH,
         unique=True,
-        help_text=_('введите username'),
-        validators=(validate_username,),
         error_messages={
             'unique': _('Пользователь с таким username уже существует.'),
         },
+        help_text=_('введите username'),
+        validators=(validate_username,),
     )
     email = models.EmailField(
         _('Почта'),
@@ -37,7 +37,7 @@ class User(AbstractUser):
     ]
 
     class Meta:
-        ordering = ('id',)
+        ordering = ('username',)
         verbose_name = _('Пользователь')
         verbose_name_plural = _('Пользователи')
 
@@ -45,29 +45,30 @@ class User(AbstractUser):
         return self.username
 
 
-class Following(models.Model):
+class Subscribed(models.Model):
     """Модель подписки"""
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='following',
-        verbose_name='Подписчик',
+        related_name=_('subscriber'),
+        verbose_name=_('Подписчик'),
     )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='followings',
-        verbose_name='Автор',
+        related_name=_('subscribing'),
+        verbose_name=_('Автор'),
     )
 
     class Meta:
-        verbose_name = 'Подписка'
-        verbose_name_plural = 'Подписки'
+        verbose_name = _('Подписка')
+        verbose_name_plural = _('Подписки')
         ordering = ['-id']
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'author'],
-                name='unique_following')]
+                name='unique_subscribe')]
 
     def __str__(self):
-        return f'Пользователь {self.user} -> автор {self.author}'
+        return (f'Пользователь {self.user}'
+                'подписался на автора {self.author}')

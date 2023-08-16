@@ -1,27 +1,16 @@
-from rest_framework import serializers
-from recipes.models import Recipes, Tags, Ingredients
-from drf_extra_fields.fields import Base64ImageField
+from recipes.models import Ingredient, Tag
+from rest_framework.serializers import ModelSerializer
 
-class TagsSerializer(serializers.ModelSerializer):
-    """Сереалайзер Тега"""
+
+class TagSerializer(ModelSerializer):
+    """Сереалайзер тегов."""
     class Meta:
-        model = Tags
+        model = Tag
         fields = '__all__'
 
 
-class IngredientsSerializer(serializers.ModelSerializer):
-    """Сереолайзер ингридиента"""
+class IngredientSerializer(ModelSerializer):
+    """Сереализатор ингредиентов."""
     class Meta:
-        model = Ingredients
+        model = Ingredient
         fields = '__all__'
-
-class RecipesSerializer(serializers.ModelSerializer):
-    """Сереолайзер Рецепта"""
-    image = Base64ImageField()
-
-    class Meta:
-        model = Recipes
-        fields = ('id', 'name', 'image', 'cooking_time')
-
-class Favorite_recipesSerializer(serializers.ModelSerializer):
-    
