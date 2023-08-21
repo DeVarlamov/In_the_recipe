@@ -1,5 +1,4 @@
 import re
-from django.forms import ValidationError
 
 from rest_framework import serializers
 
@@ -26,14 +25,6 @@ def validate_color(value):
 
 def validate_not_empty(value):
     """Валидация кооличества < 1"""
-    if len(value) < 1:
+    if value < 1:
         raise serializers.ValidationError(
             'Количество не может быть меньше одного')
-
-
-def validate_measurement_unit(value):
-    valid_units = ['kg', 'g', 'l', 'ml', 'tsp', 'tbsp', 'cup', 'oz', 'lb',
-                   'кг', 'г', 'л', 'мл', 'ч.л.',
-                   'ст.л.', 'стакан', 'унция', 'фунт', 'шт']
-    if value not in valid_units:
-        raise ValidationError('Недопустимая единица измерения')

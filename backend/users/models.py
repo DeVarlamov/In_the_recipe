@@ -70,5 +70,5 @@ class Subscribed(models.Model):
                 name='unique_subscribe')]
 
     def __str__(self):
-        return (f'Пользователь {self.user}'
-                'подписался на автора {self.author}')
+        return (f'Пользователь  {self.user}'
+                f' подписался на автора {self.author}')

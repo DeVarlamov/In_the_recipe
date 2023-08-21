@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     'djoser',
     'rest_framework',
     'rest_framework.authtoken',
+    'django_extensions',
     'users.apps.UsersConfig',
     'recipes.apps.RecipesConfig',
     'api.apps.ApiConfig',
@@ -126,11 +127,14 @@ DJOSER = {
     },
 }
 
-# Постояные константы
+# ------------------------------------------------------------------------------
+#                             Постоянные константы
+# ------------------------------------------------------------------------------
 CHARACTER_LENGTH = 150
 MAXIMUM_LENGTH = 200
 LENGTH_FOR_MAIL = 254
 LENGTH_FOR_COLOR = 7
+MINIMUM_TIME = int(1)
 
 INGREDIENT_UNITS = (
     ('г', 'граммы'),
