@@ -54,7 +54,6 @@ class Ingredient(models.Model):
         _('Название'),
         max_length=MAXIMUM_LENGTH,
         db_index=True,
-        unique=True,
         error_messages={
             'unique': _('Такой ингредиент уже есть.'),
             },
@@ -69,9 +68,21 @@ class Ingredient(models.Model):
         ordering = ['name']
         verbose_name = _("ингредиент")
         verbose_name_plural = _("ингредиенты")
+        constraints = [
+            models.UniqueConstraint(
+                fields=['name', 'measurement_unit'],
+                name='unique_ingredients'
+            )
+        ]
 
     def __str__(self):
         return f'{self.name},в {self.measurement_unit}'
+
+
+class ImportIngredient(models.Model):
+    """Модель импорта ингридиентов"""
+    csv_file = models.FileField(upload_to='uploads/')
+    date_added = models.DateTimeField(auto_now_add=True)
 
 
 class Recipe(models.Model):
