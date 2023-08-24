@@ -7,7 +7,7 @@ SECRET_KEY = 'django-insecure-#muy!1d6ix0wc%%++s6b6)un3s8+a)mm@9&0pmrv3y0%y-ww07
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 
 INSTALLED_APPS = [
@@ -134,7 +134,8 @@ CHARACTER_LENGTH = 150
 MAXIMUM_LENGTH = 200
 LENGTH_FOR_MAIL = 254
 LENGTH_FOR_COLOR = 7
-MINIMUM_TIME = int(1)
+MINIMUM_TIME = 1
+FILE_NAME = 'shopping_cart.txt'
 
 INGREDIENT_UNITS = (
     ('г', 'граммы'),

@@ -2,7 +2,6 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from foodgram.settings import CHARACTER_LENGTH, LENGTH_FOR_MAIL
-
 from users.validate import validate_username
 
 

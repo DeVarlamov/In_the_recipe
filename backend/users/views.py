@@ -1,55 +1,66 @@
 from django.shortcuts import get_object_or_404
-from djoser.views import UserViewSet
-from users.serializers import FollowSerializer
-from requests import Response
-from users.models import Subscribed, User
-from rest_framework.decorators import action
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from users.mixin import CreateListRetriveViewSet
+
+from .models import Subscribed, User
+from .serializers import (SubscribeAuthorSerializer, SubscribedSerializer,
+                          UserCreateSerializer, UserSerializer)
 
 
-class UserViewSet(UserViewSet):
+class UserViewSet(CreateListRetriveViewSet):
+    queryset = User.objects.all()
+    permission_classes = (AllowAny,)
 
-    @action(
-        detail=True,
-        permission_classes=[IsAuthenticated],
-        methods=['POST', 'DELETE'],
-        )
-    def get_subscribed(self, request, id):
-        user = request.user
-        author = get_object_or_404(User, id=id)
+    def get_serializer_class(self):
+        if self.action in ('list', 'retrieve'):
+            return UserSerializer
+        return UserCreateSerializer
 
-        if self.request.method == 'POST':
-            if Subscribed.objects.filter(user=user, author=author):
-                return Response({'Вы уже подписались на этого атора'},
-                                status=status.HTTP_400_BAD_REQUEST)
-            if user == author:
-                return Response({'Не будь нарцисом'},
-                                status=status.HTTP_400_BAD_REQUEST)
-            fallow = Subscribed.objects.create(user=user, author=author)
-            serializer = FollowSerializer(
-                fallow, context={'request': request},
-            )
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+    @action(detail=False, methods=['get'], pagination_class=None,
+            permission_classes=(IsAuthenticated,))
+    def me(self, request):
+        serializer = UserSerializer(request.user, context={'request': request})
+        return Response(serializer.data,
+                        status=status.HTTP_200_OK)
 
-        if Subscribed.objects.filter(user=user, author=author):
-            follow = get_object_or_404(Subscribed, user=user, author=author)
-            follow.delete()
-        return Response('Подписка удаленна',
-                        status=status.HTTP_204_NO_CONTENT)
-
-    @action(
-        detail=False,
-        permission_classes=[IsAuthenticated],
-        methods=['GET'],
-    )
-    def subscribed(self, request):
-        user = request.user
-        queryset = Subscribed.objects.filter(user=user)
-        pages = self.paginate_queryset(queryset)
-        serializer = FollowSerializer(
-            pages,
-            many=True,
-            context={'request': request},
-        )
+    @action(detail=False, methods=['get'],
+            permission_classes=(IsAuthenticated,))
+    def subscriptions(self, request):
+        queryset = self.get_queryset().filter(subscribing__user=request.user)
+        page = self.paginate_queryset(queryset)
+        serializer = SubscribedSerializer(page, many=True,
+                                          context={'request': request})
         return self.get_paginated_response(serializer.data)
+
+    @action(detail=True, methods=['post', 'delete'],
+            permission_classes=(IsAuthenticated,))
+    def subscribe(self, request, **kwargs):
+        author = get_object_or_404(User, id=kwargs['pk'])
+        serializer = SubscribeAuthorSerializer(author, data=request.data,
+                                               context={"request": request})
+
+        if serializer.is_valid(raise_exception=True):
+            if request.method == 'POST':
+                if Subscribed.objects.filter(user=request.user,
+                                             author=author).exists():
+                    raise ValidationError('Вы уже подписаны на этого автора')
+                if author == request.user:
+                    raise ValidationError(
+                        'Вы не можете подписаться на самого себя')
+                Subscribed.objects.create(user=request.user, author=author)
+                return Response(serializer.data,
+                                status=status.HTTP_201_CREATED)
+            if request.method == 'DELETE':
+                try:
+                    subscribed = Subscribed.objects.get(user=request.user,
+                                                        author=author)
+                except Subscribed.DoesNotExist:
+                    raise ValidationError('Вы не подписаны на этого автора')
+                subscribed.delete()
+                return Response({'detail': 'Успешная отписка'},
+                                status=status.HTTP_204_NO_CONTENT)
+        return None
