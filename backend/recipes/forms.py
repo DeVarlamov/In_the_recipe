@@ -4,7 +4,8 @@ from .models import ImportIngredient
 
 
 class IngredientImportForm(ModelForm):
-    """Форма добавления ингридиентов при импорте"""
+    """Форма добавления ингридиентов при импорте."""
+
     class Meta:
         model = ImportIngredient
         fields = ('csv_file',)

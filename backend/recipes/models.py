@@ -1,16 +1,15 @@
 from colorfield.fields import ColorField
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from users.models import User
-from foodgram.settings import (INGREDIENT_UNITS,
-                               LENGTH_FOR_COLOR,
-                               MAXIMUM_LENGTH,
-                               MINIMUM_TIME)
+from foodgram.settings import (INGREDIENT_UNITS, LENGTH_FOR_COLOR,
+                               MAXIMUM_LENGTH, MINIMUM_TIME)
 from recipes.validate import validate_color, validate_not_empty, validate_slug
+from users.models import User
 
 
 class Tag(models.Model):
-    """Модель Тегов"""
+    """Модель Тегов."""
+
     name = models.CharField(
         _('Название Тега'),
         max_length=MAXIMUM_LENGTH,
@@ -28,7 +27,7 @@ class Tag(models.Model):
          },
         default='#ffd057',
         validators=(validate_color,),
-        null=True
+        null=True,
     )
     slug = models.CharField(
         _('Уникальный Тег'),
@@ -80,22 +79,24 @@ class Ingredient(models.Model):
 
 
 class ImportIngredient(models.Model):
-    """Модель импорта ингридиентов"""
+    """Модель импорта ингридиентов."""
+
     csv_file = models.FileField(upload_to='uploads/')
     date_added = models.DateTimeField(auto_now_add=True)
 
 
 class Recipe(models.Model):
-    """Модель рецептов"""
+    """Модель рецептов."""
+
     ingredients = models.ManyToManyField(
         Ingredient,
         through='RecipeIngredient',
         through_fields=('recipe', 'ingredient'),
-        verbose_name='Ингредиенты'
+        verbose_name='Ингредиенты',
     )
     tags = models.ManyToManyField(
         Tag,
-        verbose_name='Теги'
+        verbose_name='Теги',
     )
     image = models.ImageField(
         _('Изображение блюда'),
@@ -106,7 +107,7 @@ class Recipe(models.Model):
         max_length=MAXIMUM_LENGTH,
     )
     text = models.TextField(
-        _('Описание')
+        _('Описание'),
     )
     cooking_time = models.IntegerField(
         _('Время приготовления, мин'),
@@ -117,7 +118,7 @@ class Recipe(models.Model):
         User,
         on_delete=models.CASCADE,
         related_name='recipes',
-        verbose_name='Автор рецепта'
+        verbose_name='Автор рецепта',
     )
 
     class Meta:

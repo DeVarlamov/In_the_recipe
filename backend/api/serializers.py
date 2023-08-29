@@ -11,6 +11,7 @@ from users.serializers import UserSerializer
 
 class TagSerializer(ModelSerializer):
     """Сереалайзер тегов."""
+
     class Meta:
         model = Tag
         fields = '__all__'
@@ -18,6 +19,7 @@ class TagSerializer(ModelSerializer):
 
 class IngredientSerializer(ModelSerializer):
     """Сереализатор ингредиентов."""
+
     class Meta:
         model = Ingredient
         fields = '__all__'
@@ -25,6 +27,7 @@ class IngredientSerializer(ModelSerializer):
 
 class RecipeIngredientSerializer(ModelSerializer):
     """Список ингредиентов с количеством для рецепта."""
+
     id = ReadOnlyField(source='ingredient.id')
     name = ReadOnlyField(source='ingredient.name')
     measurement_unit = ReadOnlyField(
@@ -37,12 +40,13 @@ class RecipeIngredientSerializer(ModelSerializer):
 
 
 class RecipeListSerializer(ModelSerializer):
-    """Сереалайзер списка рецептов"""
+    """Сереалайзер списка рецептов."""
+
     tags = TagSerializer(many=True,
                          read_only=True)
     author = UserSerializer(read_only=True)
     ingredients = RecipeIngredientSerializer(
-        many=True, read_only=True, source='recipes'
+        many=True, read_only=True, source='recipes',
     )
     is_favorited = SerializerMethodField()
     is_in_shopping_cart = SerializerMethodField()
@@ -75,7 +79,8 @@ class RecipeListSerializer(ModelSerializer):
 
 
 class RecipeCountIngredientSerilizer(ModelSerializer):
-    """Сереалайзер колличества ингридиентов в рецепте"""
+    """Сереалайзер колличества ингридиентов в рецепте."""
+
     id = IntegerField()
 
     class Meta:
@@ -84,7 +89,8 @@ class RecipeCountIngredientSerilizer(ModelSerializer):
 
 
 class RecipeCreateSerializer(ModelSerializer):
-    """Сереолайзер создания, удаления, редактирования рецепта"""
+    """Сереолайзер создания, удаления, редактирования рецепта."""
+
     id = ReadOnlyField()
     tags = PrimaryKeyRelatedField(many=True,
                                   queryset=Tag.objects.all())
@@ -97,26 +103,26 @@ class RecipeCreateSerializer(ModelSerializer):
                   'name', 'text', 'cooking_time')
 
     def validate(self, obj):
-        """Проверка на обезательные поля: name, text,  и cooking_time"""
+        """Проверка на обезательные поля: name, text,  и cooking_time."""
         for field in ['name', 'text', 'cooking_time']:
             if not obj.get(field):
                 raise ValidationError(
-                    f'{field}  обезательное к заполнению поле'
+                    f'{field}  обезательное к заполнению поле',
                 )
         if not obj.get('ingredients'):
             raise ValidationError(
-                'Список ингридиентов пуст'
+                'Список ингридиентов пуст',
             )
 
         if not obj.get('tags'):
             raise ValidationError(
-                'Тег обезателен'
+                'Тег обезателен',
             )
         inrgedient_id_list = [item['id'] for item in obj.get('ingredients')]
         unique_ingredient_id_list = set(inrgedient_id_list)
         if len(inrgedient_id_list) != len(unique_ingredient_id_list):
             raise ValidationError(
-                'Ингредиенты должны быть уникальны.'
+                'Ингредиенты должны быть уникальны.',
             )
         return obj
 
@@ -127,13 +133,13 @@ class RecipeCreateSerializer(ModelSerializer):
             [RecipeIngredient(
                 recipe=recipe,
                 ingredient=Ingredient.objects.get(pk=ingredient['id']),
-                amount=ingredient['amount']
-            ) for ingredient in ingredients]
+                amount=ingredient['amount'],
+            ) for ingredient in ingredients],
         )
 
     @transaction.atomic
     def create(self, validated_data):
-        """ Если исключение не возникает, рецепт создается"""
+        """Если исключение не возникает, рецепт создается."""
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
         recipe = Recipe.objects.create(**validated_data)
@@ -142,7 +148,7 @@ class RecipeCreateSerializer(ModelSerializer):
 
     @transaction.atomic
     def update(self, instance, validated_data):
-        """ Если исключение не возникает, рецепт редактируется"""
+        """Если исключение не возникает, рецепт редактируется."""
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
         super().update(instance, validated_data)

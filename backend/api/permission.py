@@ -9,6 +9,7 @@ class AuthorOrReadOnly(permissions.BasePermission):
     Только автор объекта может редактировать его.
     Все пользователи имеют доступ только для чтения.
     """
+
     def has_object_permission(self, request, view, obj):
         return (request.method in permissions.SAFE_METHODS
                 or obj.author == request.user)

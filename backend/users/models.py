@@ -6,7 +6,8 @@ from users.validate import validate_username
 
 
 class User(AbstractUser):
-    """Абстрактная модель пользователя"""
+    """Абстрактная модель пользователя."""
+
     username = models.CharField(
         _('Ваш логин'),
         max_length=CHARACTER_LENGTH,
@@ -45,7 +46,8 @@ class User(AbstractUser):
 
 
 class Subscribed(models.Model):
-    """Модель подписки"""
+    """Модель подписки."""
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

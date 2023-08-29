@@ -29,8 +29,7 @@ class ImportIngredient(admin.ModelAdmin):
 class IngredientAdmin(admin.ModelAdmin):
     """Админка ингридиентов и импорт CSV"""
     model = Ingredient
-    list_display = ('pk', 'name', 'measurement_unit',)
-    list_filter = ('name', )
+    list_display = ('pk', 'name', 'measurement_unit')
     search_fields = ('name', 'measurement_unit')
 
     def get_urls(self):
@@ -49,12 +48,11 @@ class IngredientAdmin(admin.ModelAdmin):
                     if next(rows) != ['name', 'measurement_unit']:
                         messages.warning(request, 'Неверные заголовки у файла')
                         return HttpResponseRedirect(request.path_info)
-                    for row in rows:
-                        print(row[1])
-                        Ingredient.objects.update_or_create(
-                            name=row[0],
-                            measurement_unit=row[1],
-                        )
+                    Ingredient.objects.bulk_create(
+                        Ingredient(name=row[0],
+                                   measurement_unit=row[1],
+                                   )
+                        for row in rows)
                 url = reverse('admin:index')
                 messages.success(request, 'Файл успешно импортирован')
                 return HttpResponseRedirect(url)

@@ -1,3 +1,5 @@
+from django.contrib.auth.password_validation import validate_password
+from django.core import exceptions as django_exceptions
 from djoser.serializers import UserCreateSerializer
 from drf_extra_fields.fields import Base64ImageField
 from recipes.models import Recipe
@@ -7,7 +9,8 @@ from .models import Subscribed, User
 
 
 class UserRegistrationSerializer(UserCreateSerializer):
-    """Сереалайзер регистрации"""
+    """Сереалайзер регистрации."""
+
     class Meta(UserCreateSerializer.Meta):
         model = User
         fields = ('email',
@@ -20,7 +23,8 @@ class UserRegistrationSerializer(UserCreateSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """Сереалайзер данных юзера"""
+    """Сереалайзер данных юзера."""
+
     is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
@@ -40,8 +44,38 @@ class UserSerializer(serializers.ModelSerializer):
         return Subscribed.objects.filter(user=user, author=obj).exists()
 
 
+class SetPasswordSerializer(serializers.Serializer):
+    """Сереализатор изменение пароля пользователя."""
+
+    current_password = serializers.CharField()
+    new_password = serializers.CharField()
+
+    def validate(self, data):
+        try:
+            validate_password(data['new_password'])
+        except django_exceptions.ValidationError as e:
+            raise serializers.ValidationError(
+                {'new_password': list(e.messages)})
+        return data
+
+    def update(self, instance, validated_data):
+        current_password = validated_data['current_password']
+        new_password = validated_data['new_password']
+        if not instance.check_password(current_password):
+            raise serializers.ValidationError(
+                {'current_password': 'Неправильный пароль.'})
+        if current_password == new_password:
+            raise serializers.ValidationError(
+                {'new_password': 'Новый пароль должен отличаться от текущего.',
+                 })
+        instance.set_password(new_password)
+        instance.save()
+        return validated_data
+
+
 class RecipeSerializer(serializers.ModelSerializer):
     """Список рецептов без ингридиентов."""
+
     image = Base64ImageField(read_only=True)
     name = serializers.ReadOnlyField()
     cooking_time = serializers.ReadOnlyField()
@@ -53,12 +87,15 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 
 class SubscribedSerializer(serializers.ModelSerializer):
-    """Список обьектов на которые подписан юзер"""
+    """Список обьектов на которые подписан юзер."""
+
     email = serializers.ReadOnlyField()
     username = serializers.ReadOnlyField()
     is_subscribed = serializers.SerializerMethodField()
     recipes = RecipeSerializer(many=True, read_only=True)
     recipes_count = serializers.SerializerMethodField()
+    first_name = serializers.ReadOnlyField()
+    last_name = serializers.ReadOnlyField()
 
     class Meta:
         model = User

@@ -1,12 +1,13 @@
-from api.filters import RecipeFilter
+from api.filters import IngredientFilter, RecipeFilter
 from django.db import models
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from foodgram.settings import FILE_NAME
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             ShoppingСart, Tag)
-from rest_framework import filters, status
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -19,33 +20,39 @@ from .serializers import (IngredientSerializer, RecipeCreateSerializer,
 
 
 class TagViewSet(ReadOnlyModelViewSet):
-    """Вьюсет тегов"""
+    """Вьюсет тегов."""
+
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = (AllowAny,)
+    pagination_class = None
 
 
 class IngredientViewSet(ReadOnlyModelViewSet):
-    """Вьюсет ингридеентов"""
+    """Вьюсет ингридеентов."""
+
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = (AllowAny,)
-    filter_backends = (filters.SearchFilter, )
-    search_fields = ('^name', 'name')
+    pagination_class = None
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = IngredientFilter
 
 
 class RecipeViewSet(ModelViewSet):
-    """Вью сет для рецептов"""
+    """Вью сет для рецептов."""
+
     queryset = Recipe.objects.all()
     permission_classes = ((AuthorOrReadOnly, ))
+    filter_backends = [DjangoFilterBackend]
     filterset_class = RecipeFilter
 
     def perform_create(self, serializer):
-        '''Метод создания нового рецепта.'''
+        """Метод создания нового рецепта."""
         serializer.save(author=self.request.user)
 
     def get_serializer_class(self):
-        """Метод определения сереалайзера"""
+        """Метод определения сереалайзера."""
         if self.request.method in ('POST', 'PUT', 'PATCH'):
             return RecipeListSerializer
         return RecipeCreateSerializer
@@ -57,7 +64,7 @@ class RecipeViewSet(ModelViewSet):
 
         if request.method == 'POST':
             serializer = RecipeSerializer(recipe, data=request.data,
-                                          context={"request": request})
+                                          context={'request': request})
             serializer.is_valid(raise_exception=True)
             if not Favorite.objects.filter(user=request.user,
                                            recipe=recipe).exists():
@@ -81,7 +88,7 @@ class RecipeViewSet(ModelViewSet):
 
         if request.method == 'POST':
             serializer = RecipeSerializer(recipe, data=request.data,
-                                          context={"request": request})
+                                          context={'request': request})
             serializer.is_valid(raise_exception=True)
             if not ShoppingСart.objects.filter(user=request.user,
                                                recipe=recipe).exists():
@@ -96,7 +103,7 @@ class RecipeViewSet(ModelViewSet):
                               recipe=recipe).delete()
             return Response(
                 {'detail': 'Рецепт успешно удален из списка покупок.'},
-                status=status.HTTP_204_NO_CONTENT
+                status=status.HTTP_204_NO_CONTENT,
             )
 
         return None

@@ -7,7 +7,7 @@ class CreateListRetriveViewSet(
     CreateModelMixin,
     ListModelMixin,
     RetrieveModelMixin,
-    viewsets.GenericViewSet
+    viewsets.GenericViewSet,
 ):
     """
     Набор представлений, который сочетает в себе функциональность создания,
