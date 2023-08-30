@@ -28,15 +28,33 @@ class IngredientSerializer(ModelSerializer):
 class RecipeIngredientSerializer(ModelSerializer):
     """Список ингредиентов с количеством для рецепта."""
 
-    id = ReadOnlyField(source='ingredient.id')
-    name = ReadOnlyField(source='ingredient.name')
-    measurement_unit = ReadOnlyField(
-        source='ingredient.measurement_unit')
+    id = SerializerMethodField(
+        method_name='get_ingredient_id',
+    )
+    name = SerializerMethodField(
+        method_name='get_ingredient_name'
+    )
+    measurement_unit = SerializerMethodField(
+        method_name='get_ingredient_measure'
+    )
+
+    def get_ingredient_id(self, data):
+        return data.ingredient.id
+
+    def get_ingredient_name(self, data):
+        return data.ingredient.name
+
+    def get_ingredient_measure(self, data):
+        return data.ingredient.measurement_unit
 
     class Meta:
         model = RecipeIngredient
-        fields = ('id', 'name',
-                  'measurement_unit', 'amount')
+        fields = (
+            'id',
+            'name',
+            'measurement_unit',
+            'amount',
+        )
 
 
 class RecipeListSerializer(ModelSerializer):
@@ -81,7 +99,8 @@ class RecipeListSerializer(ModelSerializer):
 class RecipeCountIngredientSerilizer(ModelSerializer):
     """Сереалайзер колличества ингридиентов в рецепте."""
 
-    id = IntegerField()
+    id = PrimaryKeyRelatedField(queryset=Ingredient.objects.all(),
+                                source='ingredient.id')
 
     class Meta:
         model = RecipeIngredient
@@ -101,6 +120,16 @@ class RecipeCreateSerializer(ModelSerializer):
         model = Recipe
         fields = ('id', 'image', 'tags', 'ingredients',
                   'name', 'text', 'cooking_time')
+
+    def validate_ingredients(self, ingredients):
+        """Проверка - все ли ингредиенты верны."""
+        for ingredient in ingredients:
+            if not ingredient.get('id'):
+                raise ValidationError('Не указан идентификатор ингредиента')
+            if not Ingredient.objects.filter(id=ingredient['id']).exists():
+                raise ValidationError(
+                    f'Ингредиент с id={ingredient["id"]} не найден')
+        return ingredients
 
     def validate(self, obj):
         """Проверка на обезательные поля: name, text,  и cooking_time."""
@@ -160,5 +189,9 @@ class RecipeCreateSerializer(ModelSerializer):
         return instance
 
     def to_representation(self, instance):
-        return RecipeListSerializer(instance,
-                                    context=self.context).data
+        representation = super().to_representation(instance)
+        representation['ingredients'] = RecipeIngredientSerializer(
+            instance.recipes.all(),
+            many=True,
+        ).data
+        return representation

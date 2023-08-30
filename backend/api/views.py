@@ -16,7 +16,8 @@ from users.serializers import RecipeSerializer
 
 from .permission import AuthorOrReadOnly
 from .serializers import (IngredientSerializer, RecipeCreateSerializer,
-                          RecipeListSerializer, TagSerializer)
+                          RecipeIngredientSerializer, RecipeListSerializer,
+                          TagSerializer)
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -47,15 +48,22 @@ class RecipeViewSet(ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = RecipeFilter
 
+    def get_serializer_class(self):
+        if self.action in ('list', 'retrieve'):
+            return RecipeListSerializer
+        elif self.action in ('create', 'update', 'partial_update'):
+            return RecipeCreateSerializer
+        elif self.action == 'destroy':
+            return RecipeIngredientSerializer
+        return super().get_serializer_class()
+
     def perform_create(self, serializer):
         """Метод создания нового рецепта."""
         serializer.save(author=self.request.user)
 
-    def get_serializer_class(self):
-        """Метод определения сереалайзера."""
-        if self.request.method in ('POST', 'PUT', 'PATCH'):
-            return RecipeListSerializer
-        return RecipeCreateSerializer
+    def perform_update(self, serializer):
+        """Редактирование рецепта."""
+        serializer.save(author=self.request.user)
 
     @action(detail=True, methods=['post', 'delete'],
             permission_classes=(IsAuthenticated,))

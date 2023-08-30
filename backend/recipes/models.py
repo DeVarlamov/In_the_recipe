@@ -40,6 +40,7 @@ class Tag(models.Model):
     )
 
     class Meta:
+        ordering = ('name',)
         verbose_name = _("Тег")
         verbose_name_plural = _("Теги")
 
@@ -120,9 +121,13 @@ class Recipe(models.Model):
         related_name='recipes',
         verbose_name='Автор рецепта',
     )
+    pub_date = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата публикации'
+    )
 
     class Meta:
-        ordering = ['name']
+        ordering = ('-pub_date',)
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
 
@@ -152,6 +157,7 @@ class RecipeIngredient(models.Model):
     )
 
     class Meta:
+        ordering = ('recipe',)
         verbose_name = 'Ингредиенты в рецепте'
         verbose_name_plural = 'Ингредиенты в рецептах'
         constraints = [
