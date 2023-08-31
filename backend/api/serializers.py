@@ -1,9 +1,7 @@
-from django.db import transaction
-from django.forms import IntegerField
 from drf_extra_fields.fields import Base64ImageField
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             ShoppingСart, Tag)
-from rest_framework.serializers import (ModelSerializer,
+from rest_framework.serializers import (IntegerField, ModelSerializer,
                                         PrimaryKeyRelatedField, ReadOnlyField,
                                         SerializerMethodField, ValidationError)
 from users.serializers import UserSerializer
@@ -27,34 +25,15 @@ class IngredientSerializer(ModelSerializer):
 
 class RecipeIngredientSerializer(ModelSerializer):
     """Список ингредиентов с количеством для рецепта."""
-
-    id = SerializerMethodField(
-        method_name='get_ingredient_id',
-    )
-    name = SerializerMethodField(
-        method_name='get_ingredient_name'
-    )
-    measurement_unit = SerializerMethodField(
-        method_name='get_ingredient_measure'
-    )
-
-    def get_ingredient_id(self, data):
-        return data.ingredient.id
-
-    def get_ingredient_name(self, data):
-        return data.ingredient.name
-
-    def get_ingredient_measure(self, data):
-        return data.ingredient.measurement_unit
+    id = ReadOnlyField(source='ingredient.id')
+    name = ReadOnlyField(source='ingredient.name')
+    measurement_unit = ReadOnlyField(
+        source='ingredient.measurement_unit')
 
     class Meta:
         model = RecipeIngredient
-        fields = (
-            'id',
-            'name',
-            'measurement_unit',
-            'amount',
-        )
+        fields = ('id', 'name',
+                  'measurement_unit', 'amount')
 
 
 class RecipeListSerializer(ModelSerializer):
@@ -96,15 +75,17 @@ class RecipeListSerializer(ModelSerializer):
         )
 
 
-class RecipeCountIngredientSerilizer(ModelSerializer):
+class GetIngredientSerilizer(ModelSerializer):
     """Сереалайзер колличества ингридиентов в рецепте."""
-
-    id = PrimaryKeyRelatedField(queryset=Ingredient.objects.all(),
-                                source='ingredient.id')
+    id = IntegerField()
+    amount = IntegerField()
 
     class Meta:
-        model = RecipeIngredient
-        fields = ('id', 'amount')
+        model = Ingredient
+        fields = (
+            'id',
+            'amount'
+        )
 
 
 class RecipeCreateSerializer(ModelSerializer):
@@ -113,7 +94,7 @@ class RecipeCreateSerializer(ModelSerializer):
     id = ReadOnlyField()
     tags = PrimaryKeyRelatedField(many=True,
                                   queryset=Tag.objects.all())
-    ingredients = RecipeCountIngredientSerilizer(many=True)
+    ingredients = GetIngredientSerilizer(many=True)
     image = Base64ImageField()
 
     class Meta:
@@ -124,6 +105,7 @@ class RecipeCreateSerializer(ModelSerializer):
     def validate_ingredients(self, ingredients):
         """Проверка - все ли ингредиенты верны."""
         for ingredient in ingredients:
+            print(ingredients)
             if not ingredient.get('id'):
                 raise ValidationError('Не указан идентификатор ингредиента')
             if not Ingredient.objects.filter(id=ingredient['id']).exists():
@@ -155,43 +137,44 @@ class RecipeCreateSerializer(ModelSerializer):
             )
         return obj
 
-    @transaction.atomic
-    def tags_and_ingredients_set(self, recipe, tags, ingredients):
-        recipe.tags.set(tags)
-        RecipeIngredient.objects.bulk_create(
-            [RecipeIngredient(
-                recipe=recipe,
-                ingredient=Ingredient.objects.get(pk=ingredient['id']),
-                amount=ingredient['amount'],
-            ) for ingredient in ingredients],
-        )
-
-    @transaction.atomic
     def create(self, validated_data):
-        """Если исключение не возникает, рецепт создается."""
-        tags = validated_data.pop('tags')
-        ingredients = validated_data.pop('ingredients')
+        tags_data = validated_data.pop('tags')
+        ingredients_data = validated_data.pop('ingredients')
         recipe = Recipe.objects.create(**validated_data)
-        self.tags_and_ingredients_set(recipe, tags, ingredients)
+        recipe.tags.set(tags_data)
+        for ingredient_data in ingredients_data:
+            ingredient = Ingredient.objects.get(pk=ingredient_data['id'])
+            amount = ingredient_data['amount']
+            RecipeIngredient.objects.create(
+                recipe=recipe,
+                ingredient=ingredient,
+                amount=amount
+            )
         return recipe
 
-    @transaction.atomic
     def update(self, instance, validated_data):
-        """Если исключение не возникает, рецепт редактируется."""
-        tags = validated_data.pop('tags')
-        ingredients = validated_data.pop('ingredients')
-        super().update(instance, validated_data)
-        RecipeIngredient.objects.filter(
-            recipe=instance,
-            ingredient__in=instance.ingredients.all()).delete()
-        self.tags_and_ingredients_set(instance, tags, ingredients)
+        instance.name = validated_data.get('name', instance.name)
+        instance.text = validated_data.get('text', instance.text)
+        instance.cooking_time = validated_data.get('cooking_time',
+                                                   instance.cooking_time)
+        tags_data = validated_data.get('tags')
+        if tags_data:
+            instance.tags.set(tags_data)
+        ingredients_data = validated_data.get('ingredients')
+        if ingredients_data:
+            RecipeIngredient.objects.filter(recipe=instance).delete()
+            for ingredient_data in ingredients_data:
+                ingredient = Ingredient.objects.get(pk=ingredient_data['id'])
+                amount = ingredient_data['amount']
+                RecipeIngredient.objects.create(
+                    recipe=instance,
+                    ingredient=ingredient,
+                    amount=amount
+                )
+
         instance.save()
         return instance
 
     def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation['ingredients'] = RecipeIngredientSerializer(
-            instance.recipes.all(),
-            many=True,
-        ).data
-        return representation
+        return RecipeListSerializer(instance,
+                                    context=self.context).data
