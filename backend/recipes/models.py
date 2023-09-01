@@ -24,7 +24,7 @@ class Tag(models.Model):
         unique=True,
         error_messages={
             'unique': _('Такой цвет уже существует.'),
-         },
+        },
         default='#ffd057',
         validators=(validate_color,),
         null=True,
@@ -35,7 +35,7 @@ class Tag(models.Model):
         unique=True,
         error_messages={
             'unique': _('Такой Slug уже существует.'),
-            },
+        },
         validators=(validate_slug,),
     )
 
@@ -56,7 +56,7 @@ class Ingredient(models.Model):
         db_index=True,
         error_messages={
             'unique': _('Такой ингредиент уже есть.'),
-            },
+        },
     )
     measurement_unit = models.CharField(
         _('Единица измерения'),
@@ -102,7 +102,7 @@ class Recipe(models.Model):
     image = models.ImageField(
         _('Изображение блюда'),
         upload_to='recipe_img/',
-        )
+    )
     name = models.CharField(
         _('Название блюда'),
         max_length=MAXIMUM_LENGTH,
