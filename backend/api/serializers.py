@@ -47,7 +47,7 @@ class RecipeListSerializer(ModelSerializer):
     )
     is_favorited = SerializerMethodField()
     is_in_shopping_cart = SerializerMethodField()
-    image = Base64ImageField()
+    image = ReadOnlyField(source='image.url')
 
     class Meta:
         model = Recipe
