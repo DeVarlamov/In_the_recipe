@@ -27,7 +27,7 @@ class ImportIngredient(admin.ModelAdmin):
 
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
-    """Админка ингридиентов и импорт CSV"""
+    """Админка ингридиентов и импорт-CSV"""
     model = Ingredient
     list_display = ('pk', 'name', 'measurement_unit')
     search_fields = ('name', 'measurement_unit')
