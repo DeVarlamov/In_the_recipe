@@ -5,6 +5,8 @@ from users.views import UserViewSet
 
 app_name = 'api'
 
+handler404 = 'myapp.views.my_custom_page_not_found_view'
+
 router_v1 = DefaultRouter()
 
 router_v1.register(r'recipes', RecipeViewSet, basename='recipes')

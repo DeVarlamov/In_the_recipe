@@ -2,7 +2,7 @@ from api.filters import IngredientFilter, RecipeFilter
 from django.db import models
 from django.db.models import Sum
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django_filters.rest_framework import DjangoFilterBackend
 from foodgram.settings import FILE_NAME
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
@@ -18,6 +18,10 @@ from .permission import AuthorOrReadOnly
 from .serializers import (IngredientSerializer, RecipeCreateSerializer,
                           RecipeIngredientSerializer, RecipeListSerializer,
                           TagSerializer)
+
+
+def my_custom_page_not_found_view(request, exception):
+    return render(request, '404.html', status=404)
 
 
 class TagViewSet(ReadOnlyModelViewSet):
