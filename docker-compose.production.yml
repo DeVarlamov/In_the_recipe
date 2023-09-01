@@ -26,4 +26,4 @@ services:
     volumes:
       - static:/frontend_static
     ports:
-      - 9000:80
+      - 9800:80
