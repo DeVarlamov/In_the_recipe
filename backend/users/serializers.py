@@ -1,7 +1,6 @@
 from django.contrib.auth.password_validation import validate_password
 from django.core import exceptions as django_exceptions
 from djoser.serializers import UserCreateSerializer
-from drf_extra_fields.fields import Base64ImageField
 from recipes.models import Recipe
 from rest_framework import serializers
 
@@ -76,7 +75,7 @@ class SetPasswordSerializer(serializers.Serializer):
 class RecipeSerializer(serializers.ModelSerializer):
     """Список рецептов без ингридиентов."""
 
-    image = Base64ImageField(read_only=True)
+    image = serializers.ReadOnlyField(source='image.url')
     name = serializers.ReadOnlyField()
     cooking_time = serializers.ReadOnlyField()
 
