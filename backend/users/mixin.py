@@ -1,6 +1,9 @@
 from rest_framework import viewsets
-from rest_framework.mixins import (CreateModelMixin, ListModelMixin,
-                                   RetrieveModelMixin)
+from rest_framework.mixins import (
+    CreateModelMixin,
+    ListModelMixin,
+    RetrieveModelMixin,
+)
 
 
 class CreateListRetriveViewSet(

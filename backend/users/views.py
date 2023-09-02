@@ -7,9 +7,13 @@ from rest_framework.response import Response
 from users.mixin import CreateListRetriveViewSet
 
 from .models import Subscribed, User
-from .serializers import (SetPasswordSerializer, SubscribeAuthorSerializer,
-                          SubscribedSerializer, UserCreateSerializer,
-                          UserSerializer)
+from .serializers import (
+    SetPasswordSerializer,
+    SubscribeAuthorSerializer,
+    SubscribedSerializer,
+    UserCreateSerializer,
+    UserSerializer,
+)
 
 
 class UserViewSet(CreateListRetriveViewSet):

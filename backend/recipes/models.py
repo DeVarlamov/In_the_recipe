@@ -1,8 +1,12 @@
 from colorfield.fields import ColorField
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from foodgram.settings import (INGREDIENT_UNITS, LENGTH_FOR_COLOR,
-                               MAXIMUM_LENGTH, MINIMUM_TIME)
+from foodgram.settings import (
+    INGREDIENT_UNITS,
+    LENGTH_FOR_COLOR,
+    MAXIMUM_LENGTH,
+    MINIMUM_TIME,
+)
 from recipes.validate import validate_color, validate_not_empty, validate_slug
 from users.models import User
 

@@ -5,8 +5,14 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django_filters.rest_framework import DjangoFilterBackend
 from foodgram.settings import FILE_NAME
-from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
-                            ShoppingСart, Tag)
+from recipes.models import (
+    Favorite,
+    Ingredient,
+    Recipe,
+    RecipeIngredient,
+    ShoppingСart,
+    Tag,
+)
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -15,9 +21,13 @@ from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from users.serializers import RecipeSerializer
 
 from .permission import AuthorOrReadOnly
-from .serializers import (IngredientSerializer, RecipeCreateSerializer,
-                          RecipeIngredientSerializer, RecipeListSerializer,
-                          TagSerializer)
+from .serializers import (
+    IngredientSerializer,
+    RecipeCreateSerializer,
+    RecipeIngredientSerializer,
+    RecipeListSerializer,
+    TagSerializer,
+)
 
 
 def my_custom_page_not_found_view(request, exception):
