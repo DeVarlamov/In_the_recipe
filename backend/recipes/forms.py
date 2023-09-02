@@ -1,5 +1,6 @@
 from django import forms
-from django.forms import ModelForm
+from django.forms import ModelForm, ValidationError
+from django.utils.translation import gettext_lazy as _
 
 from .models import ImportIngredient, Recipe
 
@@ -12,14 +13,17 @@ class IngredientImportForm(ModelForm):
         fields = ('csv_file',)
 
 
-class RecipeForm(forms.ModelForm):
+class RecipeAdminForm(forms.ModelForm):
     class Meta:
         model = Recipe
         fields = '__all__'
 
-    def clean_ingredients(self):
-        ingredients = self.cleaned_data.get('ingredients')
+    def clean(self):
+        cleaned_data = super().clean()
+        tags = cleaned_data.get('tags')
+        ingredients = cleaned_data.get('ingredients')
+        if tags.count() < 1:
+            raise ValidationError(_('Минимальное колличество тегов 1.'))
         if ingredients.count() < 1:
-            raise forms.ValidationError(
-                "Требуется по крайней мере один ингредиент.")
-        return ingredients
+            raise ValidationError(
+                _('Минимальное количество ингредиентов 1.'))

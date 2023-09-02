@@ -5,7 +5,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import path, reverse
 
-from .forms import IngredientImportForm, RecipeForm
+from .forms import IngredientImportForm, RecipeAdminForm
 from .models import (
     Favorite,
     ImportIngredient,
@@ -69,12 +69,12 @@ class IngredientAdmin(admin.ModelAdmin):
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    form = RecipeForm
-    list_display = ('name', 'cooking_time', 'text', 'image',
-                    'author', 'ingredient')
-    list_filter = ('name', 'author', 'tags')
-    empty_value_display = '-пусто-'
-    raw_id_fields = ('author',)
+    form = RecipeAdminForm
+    list_display = ('name', 'cooking_time', 'author', 'pub_date')
+    list_filter = ('name', 'author', 'pub_date')
+    search_fields = ('name', 'author__username')
+    date_hierarchy = 'pub_date'
+    ordering = ('-pub_date',)
 
 
 @admin.register(RecipeIngredient)
