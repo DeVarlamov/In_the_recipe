@@ -5,7 +5,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import path, reverse
 
-from .forms import IngredientImportForm, RecipeAdminForm
+from .forms import IngredientImportForm
 from .models import (
     Favorite,
     ImportIngredient,
@@ -67,14 +67,43 @@ class IngredientAdmin(admin.ModelAdmin):
         return render(request, 'admin/csv_import_page.html', {'form': form})
 
 
+class IngredientInRecipeInline(admin.TabularInline):
+    model = RecipeIngredient
+    extra = 2
+    min_num = 1
+
+
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    form = RecipeAdminForm
-    list_display = ('name', 'cooking_time', 'author', 'pub_date')
-    list_filter = ('name', 'author', 'pub_date')
-    search_fields = ('name', 'author__username')
-    date_hierarchy = 'pub_date'
-    ordering = ('-pub_date',)
+    list_display = ('id', 'pub_date', 'name', 'text', 'cooking_time',
+                    'get_tags', 'get_ingredients', 'count_favorites',)
+    readonly_fields = ('count_favorites',)
+    list_filter = ('name', 'tags',)
+    search_fields = (
+        'name', 'cooking_time',
+        'author__email', 'ingredient__name')
+    empty_value_display = '-пусто-'
+    inlines = (IngredientInRecipeInline,)
+
+    @admin.display(description='Количество в избранных')
+    def count_favorites(self, obj):
+        """Получаем количество избранных."""
+        return obj.favorites.count()
+
+    @admin.display(description='Ингредиенты')
+    def get_ingredients(self, obj):
+        """Получаем ингредиенты."""
+        return '\n '.join([
+            f'{item["ingredient__name"]} - {item["amount"]}'
+            f' {item["ingredient__measurement_unit"]}.'
+            for item in obj.ingredient_list.values(
+                'ingredient__name',
+                'amount', 'ingredient__measurement_unit')])
+
+    @admin.display(description='Тэги')
+    def get_tags(self, obj):
+        """Получаем теги."""
+        return ', '.join(_.name for _ in obj.tags.all())
 
 
 @admin.register(RecipeIngredient)
