@@ -5,7 +5,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import path, reverse
 
-from .forms import IngredientImportForm
+from .forms import IngredientImportForm, RecipeForm
 from .models import (
     Favorite,
     ImportIngredient,
@@ -69,24 +69,12 @@ class IngredientAdmin(admin.ModelAdmin):
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'cooking_time', 'display_ingredients',
-                    'text', 'image', 'author')
-    list_editable = ('cooking_time', 'text', 'image', 'author')
+    form = RecipeForm
+    list_display = ('name', 'cooking_time', 'text', 'image',
+                    'author', 'ingredient')
     list_filter = ('name', 'author', 'tags')
     empty_value_display = '-пусто-'
-
-    def display_ingredients(self, obj):
-        return ', '.join(
-            [ri.ingredient.name for ri in obj.recipeingredient_set.all()])
-
-    display_ingredients.short_description = 'Ingredients'
-
-    def save_model(self, request, obj, form, change):
-        if not obj.tags.exists() or not obj.ingredients.exists():
-            raise admin.ValidationError(
-                "В рецепте должна быть хотя "
-                "бы одна пометка и один ингредиент.")
-        super().save_model(request, obj, form, change)
+    raw_id_fields = ('author',)
 
 
 @admin.register(RecipeIngredient)
