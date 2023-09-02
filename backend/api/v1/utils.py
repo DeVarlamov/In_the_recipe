@@ -1,4 +1,4 @@
-from backend.recipes.models import Ingredient, RecipeIngredient
+from recipes.models import Ingredient, RecipeIngredient
 
 
 def create_recipe_ingredients(recipe, ingredients_data):
