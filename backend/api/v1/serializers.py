@@ -108,10 +108,13 @@ class RecipeCreateSerializer(ModelSerializer):
                   'name', 'text', 'cooking_time')
 
     def validate_ingredients(self, ingredients):
-        """Проверка - все ли ингредиенты верны."""
+        """Ингридиентов количества , есть ли они в списке БД"""
+
+        if len(ingredients) < 1:
+            raise ValidationError(
+                'Количество ингредиентов не может быть меньше 1')
 
         for ingredient in ingredients:
-            print(ingredients)
             if not ingredient.get('id'):
                 raise ValidationError('Не указан идентификатор ингредиента')
             if not Ingredient.objects.filter(id=ingredient['id']).exists():
