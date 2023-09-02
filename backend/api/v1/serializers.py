@@ -92,6 +92,13 @@ class GetIngredientSerilizer(ModelSerializer):
             'amount'
         )
 
+    def validate(self, attrs):
+        """Валидарнать на количество"""
+        if attrs['amount'] < 1:
+            raise ValidationError(
+                'Количество ингредиента не может быть меньше 1')
+        return attrs
+
 
 class RecipeCreateSerializer(ModelSerializer):
     """Сереолайзер создания, удаления, редактирования рецепта."""
@@ -109,10 +116,6 @@ class RecipeCreateSerializer(ModelSerializer):
 
     def validate_ingredients(self, ingredients):
         """Ингридиентов количества , есть ли они в списке БД"""
-
-        if len(ingredients) < 1:
-            raise ValidationError(
-                'Количество ингредиентов не может быть меньше 1')
 
         for ingredient in ingredients:
             if not ingredient.get('id'):
