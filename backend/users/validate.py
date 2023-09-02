@@ -14,8 +14,4 @@ def validate_username(value):
             'Имя пользователя содержит недопустимые'
             f'символы: {", ".join(invalid_chars)}',
         )
-    if value.lower() == 'me':
-        raise serializers.ValidationError(
-            'Имя пользователя не может быть "me".',
-        )
     return value

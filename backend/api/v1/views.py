@@ -1,4 +1,4 @@
-from api.filters import IngredientFilter, RecipeFilter
+from api.v1.filters import IngredientFilter, RecipeFilter
 from django.db import models
 from django.db.models import Sum
 from django.http import HttpResponse
@@ -53,6 +53,8 @@ class RecipeViewSet(ModelViewSet):
     filterset_class = RecipeFilter
 
     def get_serializer_class(self):
+        """Метод определения сереолайзера"""
+
         if self.action in ('list', 'retrieve'):
             return RecipeListSerializer
         elif self.action in ('create', 'update', 'partial_update'):
@@ -63,10 +65,12 @@ class RecipeViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         """Метод создания нового рецепта."""
+
         serializer.save(author=self.request.user)
 
     def perform_update(self, serializer):
         """Редактирование рецепта."""
+
         serializer.save(author=self.request.user)
 
     @action(detail=True, methods=['post', 'delete'],
@@ -96,6 +100,8 @@ class RecipeViewSet(ModelViewSet):
             permission_classes=(IsAuthenticated,),
             pagination_class=None)
     def shopping_cart(self, request, **kwargs):
+        """Метод добавления рецепта в корзину"""
+
         recipe = get_object_or_404(Recipe, id=kwargs['pk'])
 
         if request.method == 'POST':
@@ -123,6 +129,8 @@ class RecipeViewSet(ModelViewSet):
     @action(detail=False, methods=['get'],
             permission_classes=(IsAuthenticated,))
     def download_shopping_cart(self, request):
+        """Метод создания списка корзины"""
+
         user = request.user
         shopping_cart = ShoppingСart.objects.filter(user=user)
         ingredients = RecipeIngredient.objects.filter(
