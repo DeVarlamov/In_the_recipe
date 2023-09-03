@@ -14,9 +14,9 @@ from rest_framework.serializers import (
     PrimaryKeyRelatedField,
     ReadOnlyField,
     SerializerMethodField,
+    StringRelatedField,
     ValidationError,
 )
-from users.serializers import UserSerializer
 
 
 class TagSerializer(ModelSerializer):
@@ -67,7 +67,7 @@ class RecipeListSerializer(ModelSerializer):
 
     tags = TagSerializer(many=True,
                          read_only=True)
-    author = UserSerializer(read_only=True)
+    author = StringRelatedField()
     ingredients = RecipeIngredientSerializer(
         many=True, read_only=True, source='recipes',
     )
