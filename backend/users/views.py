@@ -8,7 +8,6 @@ from rest_framework.response import Response
 
 from .models import Subscribed, User
 from .serializers import (
-    SetPasswordSerializer,
     SubscribeAuthorSerializer,
     SubscribedSerializer,
     UserCreateSerializer,
@@ -27,24 +26,6 @@ class UsersViewSet(UserViewSet):
         if self.action in ('list', 'retrieve'):
             return UserSerializer
         return UserCreateSerializer
-
-    @action(detail=False, methods=['get'], pagination_class=None,
-            permission_classes=(IsAuthenticated,))
-    def me(self, request):
-        """Метод получения профиля текущего пользователяю."""
-        serializer = UserSerializer(request.user, context={'request': request})
-        return Response(serializer.data,
-                        status=status.HTTP_200_OK)
-
-    @action(detail=False, methods=['post'],
-            permission_classes=[IsAuthenticated])
-    def set_password(self, request):
-        serializer = SetPasswordSerializer(request.user, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(
-            {'detail': 'Пароль успешно изменен!'},
-            status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False, methods=['get'],
             permission_classes=(IsAuthenticated,))
