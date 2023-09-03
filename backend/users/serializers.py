@@ -2,7 +2,7 @@ from api.v1.serializers import RecipeSerializer
 from djoser.serializers import UserCreateSerializer
 from rest_framework import serializers
 
-from .models import User
+from .models import Subscribed, User
 
 
 class UserRegistrationSerializer(UserCreateSerializer):
@@ -35,11 +35,10 @@ class UserSerializer(serializers.ModelSerializer):
                   )
 
     def get_is_subscribed(self, obj):
-        user = self.context.get('request').user
-        return bool(
-            user.is_authenticated
-            and obj.subscribing.filter(user=user).exists()
-        )
+        user = self.context['request'].user
+        if user.is_anonymous:
+            return False
+        return Subscribed.objects.filter(user=user, author=obj).exists()
 
 
 class SubscribedSerializer(serializers.ModelSerializer):
