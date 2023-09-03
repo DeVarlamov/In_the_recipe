@@ -60,7 +60,7 @@ class RecipeListSerializer(ModelSerializer):
     )
     is_favorited = SerializerMethodField()
     is_in_shopping_cart = SerializerMethodField()
-    image = SerializerMethodField(method_name='get_image')
+    image = ReadOnlyField(source='image.url')
 
     class Meta:
         model = Recipe
@@ -72,10 +72,11 @@ class RecipeListSerializer(ModelSerializer):
 
     def get_is_favorited(self, obj):
         """Проверка - находится ли рецепт в избранном."""
-        request = self.context['request']
-        return bool(
-            request.user.is_authenticated
-            and Favorite.objects.filter(user=obj.user, recipe=obj).exists()
+
+        return (
+            self.context.get('request').user.is_authenticated
+            and Favorite.objects.filter(user=self.context['request'].user,
+                                        recipe=obj).exists()
         )
 
     def get_is_in_shopping_cart(self, obj):
@@ -87,13 +88,6 @@ class RecipeListSerializer(ModelSerializer):
                 user=self.context['request'].user,
                 recipe=obj).exists()
         )
-
-    def get_image(self, obj):
-        """Получите абсолютный URL-адрес изображения рецепта."""
-
-        request = self.context.get('request')
-        image_url = obj.image.url
-        return request.build_absolute_uri(image_url)
 
 
 class GetIngredientSerilizer(ModelSerializer):
