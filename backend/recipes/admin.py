@@ -73,13 +73,13 @@ class IngredientAdmin(admin.ModelAdmin):
 class RecipeIngredientInline(admin.TabularInline):
     model = RecipeIngredient
     min_num = 1
-    extra = 1
+    extra = 3
 
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ('id', 'author', 'name', 'get_ingredients',
-                    'get_tags', 'in_favorite')
+                    'get_tags', 'in_favorites')
     fields = ('name', 'author', 'text', 'image',)
     search_fields = ('name', 'author', 'tags')
     list_filter = ('name', 'author', 'tags')
@@ -92,7 +92,7 @@ class RecipeAdmin(admin.ModelAdmin):
 
     @admin.display(description='В избранном')
     def in_favorites(self, obj):
-        return obj.favorite_recipe.count()
+        return obj.favorites.count()
 
     @admin.display(description='Ингредиенты')
     def get_ingredients(self, obj):
