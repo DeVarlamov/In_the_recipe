@@ -1,9 +1,12 @@
 import csv
 
 from django.contrib import admin, messages
+from django.contrib.auth.models import Group
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import path, reverse
+from django.utils.safestring import mark_safe
+from rest_framework.authtoken.models import TokenProxy
 
 from .forms import IngredientImportForm
 from .models import (
@@ -67,12 +70,41 @@ class IngredientAdmin(admin.ModelAdmin):
         return render(request, 'admin/csv_import_page.html', {'form': form})
 
 
+class RecipeIngredientInline(admin.TabularInline):
+    model = RecipeIngredient
+    min_num = 1
+    extra = 1
+
+
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'cooking_time', 'text', 'image', 'author', )
-    list_editable = ('cooking_time', 'text', 'image', 'author')
+    list_display = ('id', 'author', 'name', 'get_ingredients',
+                    'get_tags', 'favorite')
+    fields = ('name', 'author', 'text', 'image',)
+    search_fields = ('name', 'author', 'tags')
     list_filter = ('name', 'author', 'tags')
-    empty_value_display = '-пусто-'
+    inlines = (RecipeIngredientInline,)
+    empty_value_display = '- пусто -'
+
+    @admin.display(description='Изображение')
+    def get_image(self, obj):
+        return mark_safe(f'<img src={obj.image.url} width="80" hieght="30"')
+
+    @admin.display(description='Избранное')
+    def favorite(self, obj):
+        return obj.favorite.count()
+
+    @admin.display(description='Ингредиенты')
+    def get_ingredients(self, obj):
+        ingredients_list = []
+        for ingredient in obj.ingredients.all():
+            ingredients_list.append(ingredient.name.lower())
+        return ', '.join(ingredients_list)
+
+    @admin.display(description='Теги')
+    def get_tags(self, obj):
+        ls = [_.name for _ in obj.tags.all()]
+        return ', '.join(ls)
 
 
 @admin.register(RecipeIngredient)
@@ -91,3 +123,7 @@ class FavoriteAdmin(admin.ModelAdmin):
 class ShoppingCartAdmin(admin.ModelAdmin):
     list_display = ('pk', 'user', 'recipe')
     list_editable = ('user', 'recipe')
+
+
+admin.site.unregister(Group)
+admin.site.unregister(TokenProxy)

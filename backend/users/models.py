@@ -1,7 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.utils.translation import gettext_lazy as _
-from foodgram.settings import CHARACTER_LENGTH, LENGTH_FOR_MAIL
+from foodgram.settings import CHARACTER_LENGTH
 from users.validate import validate_username
 
 
@@ -9,25 +8,25 @@ class User(AbstractUser):
     """Абстрактная модель пользователя."""
 
     username = models.CharField(
-        _('Ваш логин'),
+        'Ваш логин',
         max_length=CHARACTER_LENGTH,
         unique=True,
         error_messages={
-            'unique': _('Пользователь с таким username уже существует.'),
+            'unique': 'Пользователь с таким username уже существует.',
         },
-        help_text=_('введите username'),
+        help_text='введите username',
         validators=(validate_username,),
     )
     email = models.EmailField(
-        _('Почта'),
-        max_length=LENGTH_FOR_MAIL,
+        'Почта',
         unique=True,
         error_messages={
-            'unique': _('e-mail уже занят.'),
+            'unique': 'e-mail уже занят.',
         },
     )
-    first_name = models.CharField(_('Имя'), max_length=CHARACTER_LENGTH)
-    last_name = models.CharField(_('Фамилия'), max_length=CHARACTER_LENGTH)
+    password = models.CharField('Пароль', max_length=CHARACTER_LENGTH)
+    first_name = models.CharField('Имя', max_length=CHARACTER_LENGTH)
+    last_name = models.CharField('Фамилия', max_length=CHARACTER_LENGTH)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = [
@@ -38,8 +37,8 @@ class User(AbstractUser):
 
     class Meta:
         ordering = ('email',)
-        verbose_name = _('Пользователь')
-        verbose_name_plural = _('Пользователи')
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
 
     def __str__(self):
         return self.username
@@ -51,19 +50,19 @@ class Subscribed(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name=_('subscriber'),
-        verbose_name=_('Подписчик'),
+        related_name='subscriber',
+        verbose_name='Подписчик',
     )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name=_('subscribing'),
-        verbose_name=_('Автор'),
+        related_name='subscribing',
+        verbose_name='Автор',
     )
 
     class Meta:
-        verbose_name = _('Подписка')
-        verbose_name_plural = _('Подписки')
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
         ordering = ['-id']
         constraints = [
             models.UniqueConstraint(

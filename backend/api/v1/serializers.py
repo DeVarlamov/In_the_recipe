@@ -16,7 +16,6 @@ from rest_framework.serializers import (
     SerializerMethodField,
     ValidationError,
 )
-from users.serializers import UserSerializer
 
 
 class TagSerializer(ModelSerializer):
@@ -33,6 +32,19 @@ class IngredientSerializer(ModelSerializer):
     class Meta:
         model = Ingredient
         fields = '__all__'
+
+
+class RecipeSerializer(ModelSerializer):
+    """Список рецептов без ингридиентов."""
+
+    image = ReadOnlyField(source='image.url')
+    name = ReadOnlyField()
+    cooking_time = ReadOnlyField()
+
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name',
+                  'image', 'cooking_time')
 
 
 class RecipeIngredientSerializer(ModelSerializer):
@@ -54,13 +66,13 @@ class RecipeListSerializer(ModelSerializer):
 
     tags = TagSerializer(many=True,
                          read_only=True)
-    author = UserSerializer(read_only=True)
+    author = ReadOnlyField(read_only=True)
     ingredients = RecipeIngredientSerializer(
         many=True, read_only=True, source='recipes',
     )
     is_favorited = SerializerMethodField()
     is_in_shopping_cart = SerializerMethodField()
-    image = ReadOnlyField(source='image.url')
+    image = SerializerMethodField(method_name='get_image')
 
     class Meta:
         model = Recipe
@@ -72,11 +84,10 @@ class RecipeListSerializer(ModelSerializer):
 
     def get_is_favorited(self, obj):
         """Проверка - находится ли рецепт в избранном."""
-
-        return (
-            self.context.get('request').user.is_authenticated
-            and Favorite.objects.filter(user=self.context['request'].user,
-                                        recipe=obj).exists()
+        request = self.context['request']
+        return bool(
+            request.user.is_authenticated
+            and Favorite.objects.filter(user=request.user, recipe=obj).exists()
         )
 
     def get_is_in_shopping_cart(self, obj):
@@ -88,6 +99,13 @@ class RecipeListSerializer(ModelSerializer):
                 user=self.context['request'].user,
                 recipe=obj).exists()
         )
+
+    def get_image(self, obj):
+        """Получите абсолютный URL-адрес изображения рецепта."""
+
+        request = self.context.get('request')
+        image_url = obj.image.url
+        return request.build_absolute_uri(image_url)
 
 
 class GetIngredientSerilizer(ModelSerializer):

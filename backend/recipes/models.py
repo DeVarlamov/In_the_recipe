@@ -1,13 +1,12 @@
 from colorfield.fields import ColorField
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.utils.translation import gettext_lazy as _
 from foodgram.settings import (
     INGREDIENT_UNITS,
     LENGTH_FOR_COLOR,
     MAXIMUM_LENGTH,
-    MINIMUM_TIME,
+    MINCOUNT,
 )
-from recipes.validate import validate_color, validate_not_empty, validate_slug
 from users.models import User
 
 
@@ -15,38 +14,36 @@ class Tag(models.Model):
     """Модель Тегов."""
 
     name = models.CharField(
-        _('Название Тега'),
+        'Название Тега',
         max_length=MAXIMUM_LENGTH,
         unique=True,
         error_messages={
-            'unique': _('Тег с таким названием уже существует.'),
+            'unique': 'Тег с таким названием уже существует.',
         },
     )
     color = ColorField(
-        _('Цвет в HeX'),
+        'Цвет в HeX',
         max_length=LENGTH_FOR_COLOR,
         unique=True,
         error_messages={
-            'unique': _('Такой цвет уже существует.'),
+            'unique': 'Такой цвет уже существует.',
         },
         default='#ffd057',
-        validators=(validate_color,),
         null=True,
     )
-    slug = models.CharField(
-        _('Уникальный Тег'),
+    slug = models.SlugField(
+        'Уникальный Тег',
         max_length=MAXIMUM_LENGTH,
         unique=True,
         error_messages={
-            'unique': _('Такой Slug уже существует.'),
+            'unique': 'Такой Slug уже существует.',
         },
-        validators=(validate_slug,),
     )
 
     class Meta:
         ordering = ('name',)
-        verbose_name = _("Тег")
-        verbose_name_plural = _("Теги")
+        verbose_name = "Тег"
+        verbose_name_plural = "Теги"
 
     def __str__(self):
         return self.name
@@ -55,23 +52,23 @@ class Tag(models.Model):
 class Ingredient(models.Model):
     """Модель ингредиент"""
     name = models.CharField(
-        _('Название'),
+        'Название',
         max_length=MAXIMUM_LENGTH,
         db_index=True,
         error_messages={
-            'unique': _('Такой ингредиент уже есть.'),
+            'unique': 'Такой ингредиент уже есть.',
         },
     )
     measurement_unit = models.CharField(
-        _('Единица измерения'),
+        'Единица измерения',
         max_length=MAXIMUM_LENGTH,
         choices=INGREDIENT_UNITS,
     )
 
     class Meta:
         ordering = ['name']
-        verbose_name = _("ингредиент")
-        verbose_name_plural = _("ингредиенты")
+        verbose_name = "ингредиент"
+        verbose_name_plural = "ингредиенты"
         constraints = [
             models.UniqueConstraint(
                 fields=['name', 'measurement_unit'],
@@ -104,20 +101,29 @@ class Recipe(models.Model):
         verbose_name='Теги',
     )
     image = models.ImageField(
-        _('Изображение блюда'),
+        'Изображение блюда',
         upload_to='recipe_img/',
     )
     name = models.CharField(
-        _('Название блюда'),
+        'Название блюда',
         max_length=MAXIMUM_LENGTH,
     )
     text = models.TextField(
-        _('Описание'),
+        'Описание',
     )
-    cooking_time = models.IntegerField(
-        _('Время приготовления, мин'),
-        default=MINIMUM_TIME,
-        validators=(validate_not_empty,),
+    cooking_time = models.PositiveSmallIntegerField(
+        'Время приготовления, мин',
+        default=MINCOUNT,
+        validators=[
+            MinValueValidator(
+                1,
+                message='Время приготовления не может быть меньше 1'
+            ),
+            MaxValueValidator(
+                360,
+                message='Время приготовления не может быть больше 360'
+            )
+        ],
     )
     author = models.ForeignKey(
         User,
@@ -155,9 +161,19 @@ class RecipeIngredient(models.Model):
         related_name='ingredients',
         verbose_name='Ингредиенты'
     )
-    amount = models.IntegerField(
+    amount = models.PositiveSmallIntegerField(
         'Количество',
-        validators=(validate_not_empty,),
+        default=MINCOUNT,
+        validators=[
+            MinValueValidator(
+                1,
+                message='Количество ингредиента не может быть нулевым'
+            ),
+            MaxValueValidator(
+                1000,
+                message='Количество ингредиента не может быть больше тысячи'
+            )
+        ],
     )
 
     class Meta:
@@ -172,10 +188,7 @@ class RecipeIngredient(models.Model):
         ]
 
     def __str__(self):
-        return (f'{self.recipe.name}: '
-                f'{self.ingredient.name} - '
-                f'{self.amount} '
-                f'{self.ingredient.measurement_unit}')
+        return f'{self.recipe} содержит ингредиент/ты {self.ingredient}'
 
 
 class UserRelation(models.Model):
@@ -196,42 +209,32 @@ class UserRelation(models.Model):
     )
 
     class Meta:
+        ordering = ('id',)
         abstract = True
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'recipe'],
-                name='unique_favorite'
+                name='unique_%(class)s'
             )
         ]
 
     def __str__(self):
-        return f'{self.user.username} - {self.recipe.name}'
+        return f'{self.user.username} - {self.recipe.id}'
 
 
 class Favorite(UserRelation):
     """Подписка на избранное"""
-    class Meta:
+
+    class Meta(UserRelation.Meta):
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранное'
-        constraints = [
-            models.UniqueConstraint(
-                fields=['user', 'recipe'],
-                name='unique_favorite'
-            )
-        ]
 
 
 class ShoppingСart(UserRelation):
     """Рецепты в корзине покупок.
-    Модель связывает Recipe и  User.
+    Модель связывает Recipe и User.
     """
 
-    class Meta:
+    class Meta(UserRelation.Meta):
         verbose_name = 'Корзина'
         verbose_name_plural = 'Корзина'
-        constraints = [
-            models.UniqueConstraint(
-                fields=['user', 'recipe'],
-                name='unique_shopping_cart'
-            )
-        ]

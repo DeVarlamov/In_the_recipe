@@ -1,22 +1,20 @@
 from django.shortcuts import get_object_or_404
+from djoser.views import UserViewSet
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from users.mixin import CreateListRetriveViewSet
 
 from .models import Subscribed, User
 from .serializers import (
-    SetPasswordSerializer,
     SubscribeAuthorSerializer,
-    SubscribedSerializer,
     UserCreateSerializer,
     UserSerializer,
 )
 
 
-class UserViewSet(CreateListRetriveViewSet):
+class UserViewSet(UserViewSet):
     """Эндотип Юзера."""
 
     queryset = User.objects.all()
@@ -27,33 +25,6 @@ class UserViewSet(CreateListRetriveViewSet):
         if self.action in ('list', 'retrieve'):
             return UserSerializer
         return UserCreateSerializer
-
-    @action(detail=False, methods=['get'], pagination_class=None,
-            permission_classes=(IsAuthenticated,))
-    def me(self, request):
-        """Метод получения профиля текущего пользователяю."""
-        serializer = UserSerializer(request.user, context={'request': request})
-        return Response(serializer.data,
-                        status=status.HTTP_200_OK)
-
-    @action(detail=False, methods=['post'],
-            permission_classes=[IsAuthenticated])
-    def set_password(self, request):
-        serializer = SetPasswordSerializer(request.user, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(
-            {'detail': 'Пароль успешно изменен!'},
-            status=status.HTTP_204_NO_CONTENT)
-
-    @action(detail=False, methods=['get'],
-            permission_classes=(IsAuthenticated,))
-    def subscriptions(self, request):
-        queryset = self.get_queryset().filter(subscribing__user=request.user)
-        page = self.paginate_queryset(queryset)
-        serializer = SubscribedSerializer(page, many=True,
-                                          context={'request': request})
-        return self.get_paginated_response(serializer.data)
 
     @action(detail=True, methods=['post', 'delete'],
             permission_classes=(IsAuthenticated,))
