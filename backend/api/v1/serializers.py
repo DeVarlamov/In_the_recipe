@@ -73,7 +73,7 @@ class RecipeListSerializer(ModelSerializer):
     )
     is_favorited = SerializerMethodField()
     is_in_shopping_cart = SerializerMethodField()
-    image = SerializerMethodField(method_name='get_image')
+    image = ReadOnlyField(source='image.url')
 
     class Meta:
         model = Recipe
@@ -100,12 +100,6 @@ class RecipeListSerializer(ModelSerializer):
                 user=self.context['request'].user,
                 recipe=obj).exists()
         )
-
-    def get_image(self, obj):
-        request = self.context.get('request')
-        if request is not None:
-            return request.build_absolute_uri(obj.image.url)
-        return None
 
 
 class GetIngredientSerilizer(ModelSerializer):
