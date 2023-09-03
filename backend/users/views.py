@@ -1,10 +1,10 @@
 from django.shortcuts import get_object_or_404
+from djoser.views import UserViewSet
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from users.mixin import CreateListRetriveViewSet
 
 from .models import Subscribed, User
 from .serializers import (
@@ -16,7 +16,7 @@ from .serializers import (
 )
 
 
-class UserViewSet(CreateListRetriveViewSet):
+class UsersViewSet(UserViewSet):
     """Эндотип Юзера."""
 
     queryset = User.objects.all()
