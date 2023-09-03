@@ -13,7 +13,7 @@ class IngredientFilter(FilterSet):
 
 
 class RecipeFilter(FilterSet):
-    tags = filters.AllValuesMultipleFilter(field_name='tags__slug')
+    tags = filters.AllValuesMultipleFilter()
     is_favorited = filters.BooleanFilter(
         method='is_favorited_filter')
     is_in_shopping_cart = filters.BooleanFilter(
