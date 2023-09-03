@@ -1,13 +1,5 @@
-from drf_extra_fields.fields import Base64ImageField
-from rest_framework.serializers import (
-    IntegerField,
-    ModelSerializer,
-    PrimaryKeyRelatedField,
-    ReadOnlyField,
-    SerializerMethodField,
-    ValidationError,
-)
 from api.v1.utils import create_recipe_ingredients
+from drf_extra_fields.fields import Base64ImageField
 from recipes.models import (
     Favorite,
     Ingredient,
@@ -15,6 +7,14 @@ from recipes.models import (
     RecipeIngredient,
     ShoppingСart,
     Tag,
+)
+from rest_framework.serializers import (
+    IntegerField,
+    ModelSerializer,
+    PrimaryKeyRelatedField,
+    ReadOnlyField,
+    SerializerMethodField,
+    ValidationError,
 )
 from users.serializers import UserSerializer
 
