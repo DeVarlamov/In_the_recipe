@@ -20,7 +20,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from users.serializers import RecipeSerializer
 
-from .permission import AuthorOrReadOnly
+from .permission import IsAuthorOrReadOnly
 from .serializers import (
     IngredientSerializer,
     RecipeCreateSerializer,
@@ -58,7 +58,7 @@ class RecipeViewSet(ModelViewSet):
     """Вью сет для рецептов."""
 
     queryset = Recipe.objects.all()
-    permission_classes = ((AuthorOrReadOnly, ))
+    permission_classes = ((IsAuthorOrReadOnly, ))
     filter_backends = [DjangoFilterBackend]
     filterset_class = RecipeFilter
 
