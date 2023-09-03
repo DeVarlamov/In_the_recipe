@@ -90,9 +90,9 @@ class RecipeAdmin(admin.ModelAdmin):
     def get_image(self, obj):
         return mark_safe(f'<img src={obj.image.url} width="80" hieght="30"')
 
-    @admin.display(description='Избранное')
-    def favorite(self, obj):
-        return obj.favorite.count()
+    @admin.display(description='В избранном')
+    def in_favorites(self, obj):
+        return obj.favorite_recipe.count()
 
     @admin.display(description='Ингредиенты')
     def get_ingredients(self, obj):
