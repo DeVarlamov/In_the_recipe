@@ -1,8 +1,12 @@
 from django.shortcuts import get_object_or_404
-from djoser.views import UserViewSet
-from rest_framework import status
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
+from rest_framework.mixins import (
+    CreateModelMixin,
+    ListModelMixin,
+    RetrieveModelMixin,
+)
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
@@ -16,7 +20,16 @@ from .serializers import (
 )
 
 
-class UsersViewSet(UserViewSet):
+class CreateListRetriveViewSet(
+    CreateModelMixin,
+    ListModelMixin,
+    RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
+    pass
+
+
+class UsersViewSet(CreateListRetriveViewSet):
     """Эндотип Юзера."""
 
     queryset = User.objects.all()
