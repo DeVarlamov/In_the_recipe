@@ -4,7 +4,7 @@ from django.core import exceptions as django_exceptions
 from djoser.serializers import UserCreateSerializer
 from rest_framework import serializers
 
-from .models import Subscribed, User
+from .models import User
 
 
 class UserRegistrationSerializer(UserCreateSerializer):
@@ -74,6 +74,9 @@ class UserSerializer(serializers.ModelSerializer):
 
 class SubscribedSerializer(serializers.ModelSerializer):
     """Список обьектов на которые подписан юзер."""
+    username = serializers.ReadOnlyField()
+    last_name = serializers.ReadOnlyField()
+    first_name = serializers.ReadOnlyField()
     is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField(method_name='get_recipes')
     recipes_count = serializers.SerializerMethodField(
