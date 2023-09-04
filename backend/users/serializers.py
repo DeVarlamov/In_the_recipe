@@ -96,10 +96,11 @@ class SubscribedSerializer(serializers.ModelSerializer):
         ).data
 
     def get_is_subscribed(self, obj):
+        user = self.context.get('request').user
         return (
-            self.context.get('request').user.is_authenticated
-            and Subscribed.objects.filter(user=self.context['request'].user,
-                                          author=obj).exists())
+            user.is_authenticated
+            and obj.subscribing.filter(user=user).exists()
+        )
 
 
 class SubscribeAuthorSerializer(SubscribedSerializer):
