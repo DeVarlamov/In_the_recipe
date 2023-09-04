@@ -119,14 +119,13 @@ class RecipeListSerializer(ModelSerializer):
 class GetIngredientSerilizer(ModelSerializer):
     """Сереалайзер колличества ингридиентов в рецепте."""
 
-    ingredient = PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
+    id = PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
     amount = IntegerField(min_value=MINCOUNT, max_value=MAXIMUMCOUNT)
 
     class Meta:
         model = Ingredient
         fields = (
             'id',
-            'ingredient',
             'amount'
         )
 
