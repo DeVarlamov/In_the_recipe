@@ -4,7 +4,7 @@ from django.core import exceptions as django_exceptions
 from djoser.serializers import UserCreateSerializer
 from rest_framework import serializers
 
-from .models import User
+from .models import Subscribed, User
 
 
 class UserRegistrationSerializer(UserCreateSerializer):
@@ -65,15 +65,15 @@ class UserSerializer(serializers.ModelSerializer):
                   )
 
     def get_is_subscribed(self, obj):
-        user = self.context.get('request').user
-        return bool(
-            user.is_authenticated
-            and obj.subscribing.filter(user=user).exists()
-        )
+        user = self.context['request'].user
+        if user.is_anonymous:
+            return False
+        return Subscribed.objects.filter(user=user, author=obj).exists()
 
 
 class SubscribedSerializer(serializers.ModelSerializer):
     """Список обьектов на которые подписан юзер."""
+    is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField(method_name='get_recipes')
     recipes_count = serializers.SerializerMethodField(
         method_name='get_recipes_count')
@@ -94,6 +94,12 @@ class SubscribedSerializer(serializers.ModelSerializer):
         return RecipeSerializer(
             author_recipes, many=True
         ).data
+
+    def get_is_subscribed(self, obj):
+        return (
+            self.context.get('request').user.is_authenticated
+            and Subscribed.objects.filter(user=self.context['request'].user,
+                                          author=obj).exists())
 
 
 class SubscribeAuthorSerializer(SubscribedSerializer):
