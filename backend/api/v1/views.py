@@ -73,16 +73,6 @@ class RecipeViewSet(ModelViewSet):
             return RecipeIngredientSerializer
         return super().get_serializer_class()
 
-    def perform_create(self, serializer):
-        """Метод создания нового рецепта."""
-
-        serializer.save(author=self.request.user)
-
-    def perform_update(self, serializer):
-        """Редактирование рецепта."""
-
-        serializer.save(author=self.request.user)
-
     @action(detail=True, methods=['post', 'delete'],
             permission_classes=(IsAuthenticated,))
     def favorite(self, request, **kwargs):

@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404
 from drf_extra_fields.fields import Base64ImageField
 from foodgram.constants import MAXIMUMCOUNT, MAXIMUMTIME, MINCOUNT
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.serializers import (
     IntegerField,
     ModelSerializer,
@@ -164,12 +165,17 @@ class RecipeCreateSerializer(ModelSerializer):
     def create(self, validated_data):
         """Создание рецепта."""
 
-        tags_data = validated_data.pop('tags')
-        ingredients_data = validated_data.pop('ingredients')
+        tags_data = validated_data.pop('tags', None)
+        ingredients_data = validated_data.pop('ingredients', None)
         image = validated_data.get('image')
         if not image:
             raise ValidationError("Поле image не может быть пустым.")
-        recipe = Recipe.objects.create(**validated_data)
+
+        user = self.context['request'].user
+        if not user.is_authenticated:
+            raise PermissionDenied("Вы не авторизованы. Доступ запрещен.")
+
+        recipe = Recipe.objects.create(user=user, **validated_data)
         recipe.tags.set(tags_data)
         self.create_recipe_ingredients(recipe, ingredients_data)
         return recipe
