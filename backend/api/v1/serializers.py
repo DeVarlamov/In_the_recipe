@@ -20,7 +20,7 @@ from rest_framework.serializers import (
 from users.models import User
 
 
-class UserDateSerializer(ModelSerializer):  # Продублировал код из за ошибки
+class UserDateSerializer(ModelSerializer):  # Продублировал код и за ошибки
     """Сереалайзер данных юзера."""         # с цикличностью
 
     is_subscribed = SerializerMethodField()
@@ -109,11 +109,9 @@ class RecipeListSerializer(ModelSerializer):
 
     def get_is_favorited(self, obj):
         """Проверка - находится ли рецепт в избранном."""
-        return (
-            self.context.get('request').user.is_authenticated
-            and Favorite.objects.filter(user=self.context['request'].user,
-                                        recipe=obj).exists()
-        )
+        request = self.context.get('request')
+        return bool(request and request.user.is_authenticated and bool(
+            request.user.favorites.filter(recipe=obj).exists()))
 
     def get_is_in_shopping_cart(self, obj):
         """Проверка - находится ли рецепт в списке покупок."""
@@ -122,7 +120,7 @@ class RecipeListSerializer(ModelSerializer):
             self.context.get('request').user.is_authenticated
             and ShoppingСart.objects.filter(
                 user=self.context['request'].user,
-                recipe=obj).exists()
+                recipe=obj.shoppingcarts).exists()
         )
 
 
