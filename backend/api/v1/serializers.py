@@ -170,7 +170,7 @@ class RecipeCreateSerializer(ModelSerializer):
             raise ValidationError("Поле image не может быть пустым.")
         recipe = Recipe.objects.create(**validated_data)
         recipe.tags.set(tags_data)
-        create_recipe_ingredients(recipe, ingredients_data)
+        self.create_recipe_ingredients(recipe, ingredients_data)
         return recipe
 
     def update(self, instance, validated_data):
@@ -178,7 +178,7 @@ class RecipeCreateSerializer(ModelSerializer):
         tags_data = validated_data.pop('tags', None)
         instance.tags.set(tags_data)
         ingredients_data = validated_data.pop('ingredients', None)
-        create_recipe_ingredients(instance, ingredients_data)
+        self.create_recipe_ingredients(instance, ingredients_data)
         return super().update(instance, validated_data)
 
     def to_representation(self, instance):
