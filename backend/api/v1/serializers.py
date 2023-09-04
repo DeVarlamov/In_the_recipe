@@ -149,7 +149,7 @@ class RecipeCreateSerializer(ModelSerializer):
         """Вспомогательный метод для обработки
         создания объектов RecipeIngredient.
         """
-        recipe.recipes_ingredient.clear()
+        recipe.ingredients.clear()
         recipe_ingredients = []
         for ingredient_data in ingredients_data:
             ingredient = get_object_or_404(Ingredient,
