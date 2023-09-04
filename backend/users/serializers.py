@@ -74,10 +74,6 @@ class UserSerializer(serializers.ModelSerializer):
 
 class SubscribedSerializer(serializers.ModelSerializer):
     """Список обьектов на которые подписан юзер."""
-    email = serializers.ReadOnlyField()
-    username = serializers.ReadOnlyField()
-    last_name = serializers.ReadOnlyField()
-    first_name = serializers.ReadOnlyField()
     is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField(method_name='get_recipes')
     recipes_count = serializers.SerializerMethodField(
@@ -110,6 +106,10 @@ class SubscribedSerializer(serializers.ModelSerializer):
 
 class SubscribeAuthorSerializer(SubscribedSerializer):
     """Подписка на автора и отписка."""
+    email = serializers.ReadOnlyField()
+    username = serializers.ReadOnlyField()
+    last_name = serializers.ReadOnlyField()
+    first_name = serializers.ReadOnlyField()
 
     def validate(self, obj):
         if self.context['request'].user == obj:
