@@ -1,6 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from foodgram.settings import CHARACTER_LENGTH
+from foodgram.constants import CHARACTER_LENGTH
 from users.validate import validate_username
 
 

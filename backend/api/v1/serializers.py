@@ -17,6 +17,30 @@ from rest_framework.serializers import (
     StringRelatedField,
     ValidationError,
 )
+from users.models import User
+
+
+class UserSerializer(ModelSerializer):
+    """Сереалайзер данных юзера."""
+
+    is_subscribed = SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ('email',
+                  'id',
+                  'username',
+                  'first_name',
+                  'last_name',
+                  'is_subscribed',
+                  )
+
+    def get_is_subscribed(self, obj):
+        user = self.context.get('request').user
+        return bool(
+            user.is_authenticated
+            and obj.subscribing.filter(user=user).exists()
+        )
 
 
 class TagSerializer(ModelSerializer):
@@ -67,7 +91,7 @@ class RecipeListSerializer(ModelSerializer):
 
     tags = TagSerializer(many=True,
                          read_only=True)
-    author = StringRelatedField()
+    author = UserSerializer()
     ingredients = RecipeIngredientSerializer(
         many=True, read_only=True, source='recipes',
     )
