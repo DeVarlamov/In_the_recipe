@@ -1,15 +1,8 @@
 from django.forms import ValidationError
 from django.shortcuts import get_object_or_404
-from api.v1.utils import create_recipe_ingredients
 from drf_extra_fields.fields import Base64ImageField
 from foodgram.constants import MAXIMUMCOUNT, MAXIMUMTIME, MINCOUNT
-from recipes.models import (
-    Ingredient,
-    Recipe,
-    RecipeIngredient,
-    ShoppingСart,
-    Tag,
-)
+from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from rest_framework.serializers import (
     IntegerField,
     ModelSerializer,
