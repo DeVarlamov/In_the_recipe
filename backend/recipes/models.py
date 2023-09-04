@@ -2,9 +2,13 @@ from colorfield.fields import ColorField
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from foodgram.constants import (
+    DEFAULTCOLOR,
+    DIRICTORYPATH,
     INGREDIENT_UNITS,
     LENGTH_FOR_COLOR,
     MAXIMUM_LENGTH,
+    MAXIMUMCOUNT,
+    MAXIMUMTIME,
     MINCOUNT,
 )
 from users.models import User
@@ -28,7 +32,7 @@ class Tag(models.Model):
         error_messages={
             'unique': 'Такой цвет уже существует.',
         },
-        default='#ffd057',
+        default=DEFAULTCOLOR,
         null=True,
     )
     slug = models.SlugField(
@@ -102,7 +106,7 @@ class Recipe(models.Model):
     )
     image = models.ImageField(
         'Изображение блюда',
-        upload_to='recipe_img/',
+        upload_to=DIRICTORYPATH,
     )
     name = models.CharField(
         'Название блюда',
@@ -116,11 +120,11 @@ class Recipe(models.Model):
         default=MINCOUNT,
         validators=[
             MinValueValidator(
-                1,
+                MINCOUNT,
                 message='Время приготовления не может быть меньше 1'
             ),
             MaxValueValidator(
-                360,
+                MAXIMUMTIME,
                 message='Время приготовления не может быть больше 360'
             )
         ],
@@ -166,11 +170,11 @@ class RecipeIngredient(models.Model):
         default=MINCOUNT,
         validators=[
             MinValueValidator(
-                1,
+                MINCOUNT,
                 message='Количество ингредиента не может быть нулевым'
             ),
             MaxValueValidator(
-                1000,
+                MAXIMUMCOUNT,
                 message='Количество ингредиента не может быть больше тысячи'
             )
         ],

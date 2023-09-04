@@ -1,4 +1,5 @@
 from api.v1.utils import create_recipe_ingredients
+from backend.foodgram.constants import MAXIMUMCOUNT, MINCOUNT
 from drf_extra_fields.fields import Base64ImageField
 from recipes.models import (
     Favorite,
@@ -16,29 +17,12 @@ from rest_framework.serializers import (
     SerializerMethodField,
     ValidationError,
 )
-from users.models import Subscribed, User
+from users.serializers import UserSerializer
 
 
-class UserSerializer(ModelSerializer):
+class UserDateSerializer(UserSerializer):
     """Сереалайзер данных юзера."""
-
-    is_subscribed = SerializerMethodField()
-
-    class Meta:
-        model = User
-        fields = ('email',
-                  'id',
-                  'username',
-                  'first_name',
-                  'last_name',
-                  'is_subscribed',
-                  )
-
-    def get_is_subscribed(self, obj):
-        user = self.context['request'].user
-        if user.is_anonymous:
-            return False
-        return Subscribed.objects.filter(user=user, author=obj).exists()
+    pass
 
 
 class TagSerializer(ModelSerializer):
@@ -89,7 +73,7 @@ class RecipeListSerializer(ModelSerializer):
 
     tags = TagSerializer(many=True,
                          read_only=True)
-    author = UserSerializer()
+    author = UserDateSerializer()
     ingredients = RecipeIngredientSerializer(
         many=True, read_only=True, source='recipes',
     )
@@ -139,9 +123,12 @@ class GetIngredientSerilizer(ModelSerializer):
 
     def validate(self, attrs):
         """Валидарнать на количество"""
-        if attrs['amount'] < 1:
+        if attrs['amount'] < MINCOUNT:
             raise ValidationError(
                 'Количество ингредиента не может быть меньше 1')
+        if attrs['amount'] > MAXIMUMCOUNT:
+            raise ValidationError(
+                'Количество ингредиента не может быть больше 1000')
         return attrs
 
 
