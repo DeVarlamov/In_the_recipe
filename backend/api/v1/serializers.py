@@ -16,7 +16,7 @@ from rest_framework.serializers import (
     SerializerMethodField,
     ValidationError,
 )
-from users.models import User
+from users.models import Subscribed, User
 
 
 class UserSerializer(ModelSerializer):
@@ -35,11 +35,10 @@ class UserSerializer(ModelSerializer):
                   )
 
     def get_is_subscribed(self, obj):
-        user = self.context.get('request').user
-        return bool(
-            user.is_authenticated
-            and obj.subscribing.filter(user=user).exists()
-        )
+        user = self.context['request'].user
+        if user.is_anonymous:
+            return False
+        return Subscribed.objects.filter(user=user, author=obj).exists()
 
 
 class TagSerializer(ModelSerializer):
