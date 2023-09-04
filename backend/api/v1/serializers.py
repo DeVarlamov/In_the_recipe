@@ -171,11 +171,11 @@ class RecipeCreateSerializer(ModelSerializer):
         if not image:
             raise ValidationError("Поле image не может быть пустым.")
 
-        user = self.context['request'].user
-        if not user.is_authenticated:
+        author = self.context['request'].user
+        if not author.is_authenticated:
             raise PermissionDenied("Вы не авторизованы. Доступ запрещен.")
 
-        recipe = Recipe.objects.create(user=user, **validated_data)
+        recipe = Recipe.objects.create(user=author, **validated_data)
         recipe.tags.set(tags_data)
         self.create_recipe_ingredients(recipe, ingredients_data)
         return recipe
