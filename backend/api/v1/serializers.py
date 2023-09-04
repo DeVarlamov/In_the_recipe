@@ -2,7 +2,6 @@ from api.v1.utils import create_recipe_ingredients
 from drf_extra_fields.fields import Base64ImageField
 from foodgram.constants import MAXIMUMCOUNT, MINCOUNT
 from recipes.models import (
-    Favorite,
     Ingredient,
     Recipe,
     RecipeIngredient,
