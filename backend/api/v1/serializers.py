@@ -14,7 +14,6 @@ from rest_framework.serializers import (
     PrimaryKeyRelatedField,
     ReadOnlyField,
     SerializerMethodField,
-    StringRelatedField,
     ValidationError,
 )
 from users.models import User
