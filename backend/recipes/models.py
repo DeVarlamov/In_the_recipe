@@ -200,15 +200,15 @@ class UserRelation(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='%(class)ss',
-        related_query_name='%(class)ss',
+        # related_name='%(class)ss',
+        # related_query_name='%(class)ss',
         verbose_name='Пользователь'
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='%(class)ss',
-        related_query_name='%(class)ss',
+        # related_name='%(class)ss',
+        # related_query_name='%(class)ss',
         verbose_name='Рецепт'
     )
 
@@ -230,6 +230,7 @@ class Favorite(UserRelation):
     """Подписка на избранное"""
 
     class Meta(UserRelation.Meta):
+        default_related_name = 'favorite'
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранное'
 
@@ -240,5 +241,6 @@ class ShoppingСart(UserRelation):
     """
 
     class Meta(UserRelation.Meta):
+        default_related_name = 'shoppingcart'
         verbose_name = 'Корзина'
         verbose_name_plural = 'Корзина'

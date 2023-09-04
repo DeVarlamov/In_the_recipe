@@ -1,3 +1,5 @@
+from django.forms import ValidationError
+from django.shortcuts import get_object_or_404
 from api.v1.utils import create_recipe_ingredients
 from drf_extra_fields.fields import Base64ImageField
 from foodgram.constants import MAXIMUMCOUNT, MAXIMUMTIME, MINCOUNT
@@ -109,23 +111,14 @@ class RecipeListSerializer(ModelSerializer):
         """Проверка - находится ли рецепт в избранном."""
         request = self.context.get('request')
         return bool(request and request.user.is_authenticated and bool(
-            request.user.favorites.filter(recipe=obj).exists()))
+            obj.user.favorite.filter(recipe=obj, user=request.user).exists()))
 
     def get_is_in_shopping_cart(self, obj):
         """Проверка - находится ли рецепт в списке покупок."""
-        return (
-            self.context.get('request').user.is_authenticated
-            and ShoppingСart.objects.filter(
-                user=self.context['request'].user,
-                recipe=obj).exists()
-        )
-
-    # def get_is_in_shopping_cart(self, obj):
-    #     """Проверка - находится ли рецепт в списке покупок."""
-    #     request = self.context.get('request')
-    #     return bool(request and request.user.is_authenticated and bool(
-    #         request.user.shoppingcarts.filter(recipe=obj).exists()))
-    # Не сработало по request.user.shoppingcarts
+        request = self.context.get('request')
+        return bool(request and request.user.is_authenticated and bool(
+            obj.user.shoppingcart.filter(recipe=obj,
+                                         user=request.user).exists()))
 
 
 class GetIngredientSerilizer(ModelSerializer):
@@ -156,11 +149,32 @@ class RecipeCreateSerializer(ModelSerializer):
         fields = ('id', 'image', 'tags', 'ingredients',
                   'name', 'text', 'cooking_time')
 
+    @staticmethod
+    def create_recipe_ingredients(recipe, ingredients_data):
+        """
+        Вспомогательный метод для обработки
+        создания объектов RecipeIngredient.
+        """
+        RecipeIngredient.objects.filter(recipe=recipe).clear()
+        recipe_ingredients = []
+        for ingredient_data in ingredients_data:
+            ingredient = get_object_or_404(Ingredient,
+                                           id=ingredient_data['id'])
+            amount = ingredient_data['amount']
+            recipe_ingredients.append(
+                RecipeIngredient(recipe=recipe, ingredient=ingredient,
+                                 amount=amount)
+            )
+        RecipeIngredient.objects.bulk_create(recipe_ingredients)
+
     def create(self, validated_data):
         """Создание рецепта."""
 
         tags_data = validated_data.pop('tags')
         ingredients_data = validated_data.pop('ingredients')
+        image = validated_data.get('image')
+        if not image:
+            raise ValidationError("Поле image не может быть пустым.")
         recipe = Recipe.objects.create(**validated_data)
         recipe.tags.set(tags_data)
         create_recipe_ingredients(recipe, ingredients_data)
@@ -168,18 +182,11 @@ class RecipeCreateSerializer(ModelSerializer):
 
     def update(self, instance, validated_data):
         """Редактирование рецепта."""
-
-        instance.name = validated_data.get('name', instance.name)
-        instance.text = validated_data.get('text', instance.text)
-        instance.cooking_time = validated_data.get(
-            'cooking_time', instance.cooking_time)
-        tags_data = validated_data.get('tags')
-        if tags_data:
-            instance.tags.set(tags_data)
-        ingredients_data = validated_data.get('ingredients')
-        if ingredients_data:
-            create_recipe_ingredients(instance, ingredients_data)
-        return instance
+        tags_data = validated_data.pop('tags', None)
+        instance.tags.set(tags_data)
+        ingredients_data = validated_data.pop('ingredients', None)
+        create_recipe_ingredients(instance, ingredients_data)
+        return super().update(instance, validated_data)
 
     def to_representation(self, instance):
         return RecipeListSerializer(instance,

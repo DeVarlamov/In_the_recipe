@@ -9,10 +9,10 @@ handler404 = 'api.views.my_custom_page_not_found_view'
 
 router_v1 = DefaultRouter()
 
-router_v1.register(r'recipes', RecipeViewSet, basename='recipes')
-router_v1.register(r'users', UsersViewSet, basename='users')
-router_v1.register(r'tags', TagViewSet, basename='tag')
-router_v1.register(r'ingredients', IngredientViewSet, basename='ingredients')
+router_v1.register('recipes', RecipeViewSet, basename='recipes')
+router_v1.register('users', UsersViewSet, basename='users')
+router_v1.register('tags', TagViewSet, basename='tag')
+router_v1.register('ingredients', IngredientViewSet, basename='ingredients')
 
 urlpatterns = [
     path('', include(router_v1.urls)),
