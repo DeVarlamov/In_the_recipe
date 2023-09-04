@@ -1,13 +1,7 @@
 from api.v1.utils import create_recipe_ingredients
 from drf_extra_fields.fields import Base64ImageField
 from foodgram.constants import MAXIMUMCOUNT, MINCOUNT
-from recipes.models import (
-    Ingredient,
-    Recipe,
-    RecipeIngredient,
-    ShoppingСart,
-    Tag,
-)
+from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from rest_framework.serializers import (
     IntegerField,
     ModelSerializer,
@@ -114,13 +108,9 @@ class RecipeListSerializer(ModelSerializer):
 
     def get_is_in_shopping_cart(self, obj):
         """Проверка - находится ли рецепт в списке покупок."""
-
-        return (
-            self.context.get('request').user.is_authenticated
-            and ShoppingСart.objects.filter(
-                user=self.context['request'].user,
-                recipe=obj).exists()
-        )
+        request = self.context.get('request')
+        return bool(request and request.user.is_authenticated and bool(
+            request.user.shopping_list.filter(recipe=obj).exists()))
 
 
 class GetIngredientSerilizer(ModelSerializer):
