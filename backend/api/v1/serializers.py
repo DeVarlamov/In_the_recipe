@@ -1,8 +1,21 @@
 from django.forms import ValidationError
 from django.shortcuts import get_object_or_404
 from drf_extra_fields.fields import Base64ImageField
-from foodgram.constants import MAXIMUMCOUNT, MAXIMUMTIME, MINCOUNT
-from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
+from foodgram.constants import (
+    FAVORITERECIPE,
+    MAXIMUMCOUNT,
+    MAXIMUMTIME,
+    MINCOUNT,
+    SHOPINGLIST,
+)
+from recipes.models import (
+    Favorite,
+    Ingredient,
+    Recipe,
+    RecipeIngredient,
+    ShoppingСart,
+    Tag,
+)
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.serializers import (
     IntegerField,
@@ -11,6 +24,7 @@ from rest_framework.serializers import (
     ReadOnlyField,
     SerializerMethodField,
 )
+from rest_framework.validators import UniqueTogetherValidator
 from users.models import User
 
 
@@ -190,3 +204,45 @@ class RecipeCreateSerializer(ModelSerializer):
     def to_representation(self, instance):
         return RecipeListSerializer(instance,
                                     context=self.context).data
+
+
+class FavoriteSerializer(ModelSerializer):
+    """Сереалайзер избранного"""
+    class Meta:
+        model = Favorite
+        fields = ('user', 'recipe')
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Favorite.objects.all(),
+                fields=['user', 'recipe'],
+                message=FAVORITERECIPE
+            )
+        ]
+
+    def to_representation(self, instance):
+        request = self.context.get('request')
+        return RecipeSerializer(
+            instance.recipe,
+            context={'request': request}
+        ).data
+
+
+class ShoppingСartSerializer(ModelSerializer):
+    """Сереалайзер добавления в карзину"""
+    class Meta:
+        model = ShoppingСart
+        fields = ('user', 'recipe')
+        validators = [
+            UniqueTogetherValidator(
+                queryset=ShoppingСart.objects.all(),
+                fields=['user', 'recipe'],
+                message=SHOPINGLIST
+            )
+        ]
+
+    def to_representation(self, instance):
+        request = self.context.get('request')
+        return RecipeSerializer(
+            instance.recipe,
+            context={'request': request}
+        ).data

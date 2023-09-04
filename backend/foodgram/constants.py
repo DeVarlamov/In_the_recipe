@@ -10,6 +10,8 @@ DEFAULTCOLOR = '#ffd057'
 FILE_NAME = 'shopping_cart.txt'
 DIRICTORYPATH = 'recipe_img/'
 MAXIMUMTIME = 360
+FAVORITERECIPE = 'У вас уже есть это рецепт'
+SHOPINGLIST = 'Уже добавленно в карзину. Пора за покупочками'
 
 INGREDIENT_UNITS = (
     ('г', 'граммы'),
