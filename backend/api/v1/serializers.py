@@ -127,13 +127,14 @@ class RecipeListSerializer(ModelSerializer):
     #     return bool(request and request.user.is_authenticated and bool(
     #         request.user.shoppingcarts.filter(recipe=obj).exists()))
     # Не сработало по request.user.shoppingcarts пишет нет такого атрибута
+    # Не смог найти обьяснения ситуации
 
 
 class GetIngredientSerilizer(ModelSerializer):
     """Сереалайзер колличества ингридиентов в рецепте."""
 
     ingredient = PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
-    amount = IntegerField()
+    amount = IntegerField(min_value=MINCOUNT, max_value=MAXIMUMCOUNT)
 
     class Meta:
         model = Ingredient
@@ -141,16 +142,6 @@ class GetIngredientSerilizer(ModelSerializer):
             'id',
             'amount'
         )
-
-    def validate(self, attrs):
-        """Валидарнать на количество"""
-        if attrs['amount'] < MINCOUNT:
-            raise ValidationError(
-                'Количество ингредиента не может быть меньше 1')
-        if attrs['amount'] > MAXIMUMCOUNT:
-            raise ValidationError(
-                'Количество ингредиента не может быть больше 1000')
-        return attrs
 
 
 class RecipeCreateSerializer(ModelSerializer):
