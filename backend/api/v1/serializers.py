@@ -126,13 +126,13 @@ class RecipeListSerializer(ModelSerializer):
     #     request = self.context.get('request')
     #     return bool(request and request.user.is_authenticated and bool(
     #         request.user.shoppingcarts.filter(recipe=obj).exists()))
-    # Не сработало по request.user.shoppingcarts
+    # Не сработало по request.user.shoppingcarts пишет нет такого атрибута
 
 
 class GetIngredientSerilizer(ModelSerializer):
     """Сереалайзер колличества ингридиентов в рецепте."""
 
-    id = IntegerField()
+    ingredient = PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
     amount = IntegerField()
 
     class Meta:
@@ -166,17 +166,6 @@ class RecipeCreateSerializer(ModelSerializer):
         model = Recipe
         fields = ('id', 'image', 'tags', 'ingredients',
                   'name', 'text', 'cooking_time')
-
-    def validate_ingredients(self, ingredients):
-        """Ингридиентов количества , есть ли они в списке БД"""
-
-        for ingredient in ingredients:
-            if not ingredient.get('id'):
-                raise ValidationError('Не указан идентификатор ингредиента')
-            if not Ingredient.objects.filter(id=ingredient['id']).exists():
-                raise ValidationError(
-                    f'Ингредиент с id={ingredient["id"]} не найден')
-        return ingredients
 
     def validate(self, obj):
         """Проверка на обезательные поля: name, text,  и cooking_time."""
