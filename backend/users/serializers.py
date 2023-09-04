@@ -74,6 +74,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class SubscribedSerializer(serializers.ModelSerializer):
     """Список обьектов на которые подписан юзер."""
+    email = serializers.ReadOnlyField()
     username = serializers.ReadOnlyField()
     last_name = serializers.ReadOnlyField()
     first_name = serializers.ReadOnlyField()
