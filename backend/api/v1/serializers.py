@@ -126,6 +126,7 @@ class GetIngredientSerilizer(ModelSerializer):
         model = Ingredient
         fields = (
             'id',
+            'ingredient',
             'amount'
         )
 
