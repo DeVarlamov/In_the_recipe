@@ -146,11 +146,10 @@ class RecipeCreateSerializer(ModelSerializer):
 
     @staticmethod
     def create_recipe_ingredients(recipe, ingredients_data):
-        """
-        Вспомогательный метод для обработки
+        """Вспомогательный метод для обработки
         создания объектов RecipeIngredient.
         """
-        RecipeIngredient.objects.filter(recipe=recipe).clear()
+        recipe.recipeingredient_set.clear()
         recipe_ingredients = []
         for ingredient_data in ingredients_data:
             ingredient = get_object_or_404(Ingredient,
@@ -158,8 +157,7 @@ class RecipeCreateSerializer(ModelSerializer):
             amount = ingredient_data['amount']
             recipe_ingredients.append(
                 RecipeIngredient(recipe=recipe, ingredient=ingredient,
-                                 amount=amount)
-            )
+                                 amount=amount))
         RecipeIngredient.objects.bulk_create(recipe_ingredients)
 
     def create(self, validated_data):
