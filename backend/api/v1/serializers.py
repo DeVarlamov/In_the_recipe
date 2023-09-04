@@ -125,8 +125,7 @@ class RecipeListSerializer(ModelSerializer):
     #     request = self.context.get('request')
     #     return bool(request and request.user.is_authenticated and bool(
     #         request.user.shoppingcarts.filter(recipe=obj).exists()))
-    # Не сработало по request.user.shoppingcarts пишет нет такого атрибута
-    # Не смог найти обьяснения ситуации
+    # Не сработало по request.user.shoppingcarts
 
 
 class GetIngredientSerilizer(ModelSerializer):
