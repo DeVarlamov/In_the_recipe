@@ -1,6 +1,6 @@
 from api.v1.utils import create_recipe_ingredients
 from drf_extra_fields.fields import Base64ImageField
-from foodgram.constants import MAXIMUMCOUNT, MINCOUNT
+from foodgram.constants import MAXIMUMCOUNT, MAXIMUMTIME, MINCOUNT
 from recipes.models import (
     Ingredient,
     Recipe,
@@ -14,7 +14,6 @@ from rest_framework.serializers import (
     PrimaryKeyRelatedField,
     ReadOnlyField,
     SerializerMethodField,
-    ValidationError,
 )
 from users.models import User
 
@@ -147,9 +146,9 @@ class GetIngredientSerilizer(ModelSerializer):
 class RecipeCreateSerializer(ModelSerializer):
     """Сереолайзер создания, удаления, редактирования рецепта."""
 
-    id = ReadOnlyField()
     tags = PrimaryKeyRelatedField(many=True,
                                   queryset=Tag.objects.all())
+    cooking_time = IntegerField(min_value=MINCOUNT, max_value=MAXIMUMTIME)
     ingredients = GetIngredientSerilizer(many=True)
     image = Base64ImageField()
 
@@ -157,31 +156,6 @@ class RecipeCreateSerializer(ModelSerializer):
         model = Recipe
         fields = ('id', 'image', 'tags', 'ingredients',
                   'name', 'text', 'cooking_time')
-
-    def validate(self, obj):
-        """Проверка на обезательные поля: name, text,  и cooking_time."""
-
-        for field in ['name', 'text', 'cooking_time']:
-            if not obj.get(field):
-                raise ValidationError(
-                    f'{field}  обезательное к заполнению поле',
-                )
-        if not obj.get('ingredients'):
-            raise ValidationError(
-                'Список ингридиентов пуст',
-            )
-
-        if not obj.get('tags'):
-            raise ValidationError(
-                'Тег обезателен',
-            )
-        inrgedient_id_list = [item['id'] for item in obj.get('ingredients')]
-        unique_ingredient_id_list = set(inrgedient_id_list)
-        if len(inrgedient_id_list) != len(unique_ingredient_id_list):
-            raise ValidationError(
-                'Ингредиенты должны быть уникальны.',
-            )
-        return obj
 
     def create(self, validated_data):
         """Создание рецепта."""
