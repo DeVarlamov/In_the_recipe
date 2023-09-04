@@ -1,6 +1,6 @@
 from api.v1.utils import create_recipe_ingredients
-from backend.foodgram.constants import MAXIMUMCOUNT, MINCOUNT
 from drf_extra_fields.fields import Base64ImageField
+from foodgram.constants import MAXIMUMCOUNT, MINCOUNT
 from recipes.models import (
     Favorite,
     Ingredient,
@@ -20,8 +20,8 @@ from rest_framework.serializers import (
 from users.models import User
 
 
-class UserDateSerializer(ModelSerializer):
-    """Сереалайзер данных юзера."""
+class UserDateSerializer(ModelSerializer):  # Продублировал код из за ошибки
+    """Сереалайзер данных юзера."""         # с цикличностью
 
     is_subscribed = SerializerMethodField()
 
