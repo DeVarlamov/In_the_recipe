@@ -75,18 +75,18 @@ class RecipeViewSet(ModelViewSet):
 
     @action(detail=True, methods=['post', 'delete'],
             permission_classes=(IsAuthenticated,))
-    def favorite(self, request, id):
+    def favorite(self, request, pk):
         return adding_deleting(
-            FavoriteSerializer, Favorite, request, id
+            FavoriteSerializer, Favorite, request, pk
         )
 
     @action(detail=True, methods=['post', 'delete'],
             permission_classes=(IsAuthenticated,),
             pagination_class=None)
-    def shopping_cart(self, request, id):
+    def shopping_cart(self, request, pk):
         """Метод добавления рецепта в корзину"""
         return adding_deleting(
-            ShoppingСartSerializer, ShoppingСart, request, id
+            ShoppingСartSerializer, ShoppingСart, request, pk
         )
 
     @action(detail=False, methods=['get'],
