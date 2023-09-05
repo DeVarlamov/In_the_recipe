@@ -1,4 +1,4 @@
-from api.v1.serializers import RecipeSerializer, UserDateSerializer
+from api.v1.serializers import RecipeSerializer
 from djoser.serializers import UserCreateSerializer
 from rest_framework import exceptions, serializers, status
 
@@ -42,15 +42,15 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
 
-class SubscribedSerializer(UserDateSerializer):
+class SubscribedSerializer(UserSerializer):
     """Сереалайзер Подписок."""
     recipes = serializers.SerializerMethodField(method_name='get_recipes',
                                                 read_only=True)
     recipes_count = serializers.SerializerMethodField(
         method_name='get_recipes_count', read_only=True)
 
-    class Meta(UserDateSerializer.Meta):
-        fields = UserDateSerializer.Meta.fields + (
+    class Meta(UserSerializer.Meta):
+        fields = UserSerializer.Meta.fields + (
             'recipes', 'recipes_count',
         )
         read_only_fields = ('email', 'username', 'last_name', 'first_name',)
@@ -92,17 +92,3 @@ class SubscribedSerializer(UserDateSerializer):
             user.is_authenticated
             and obj.subscribing.filter(user=user).exists()
         )
-
-
-class SubscribeAuthorSerializer(SubscribedSerializer):
-    """Подписка на автора и отписка."""
-    email = serializers.ReadOnlyField()
-    username = serializers.ReadOnlyField()
-    last_name = serializers.ReadOnlyField()
-    first_name = serializers.ReadOnlyField()
-
-    def validate(self, obj):
-        if self.context['request'].user == obj:
-            raise serializers.ValidationError(
-                {'errors': 'Нельзя подписаться на себя.'})
-        return obj
