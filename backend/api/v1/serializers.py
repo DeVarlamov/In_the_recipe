@@ -31,6 +31,7 @@ from users.models import User
 
 
 class UserDateSerializer(ModelSerializer):
+    """Сереалайзер получения информации о юзере."""
 
     is_subscribed = SerializerMethodField()
 

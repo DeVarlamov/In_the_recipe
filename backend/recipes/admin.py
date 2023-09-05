@@ -8,7 +8,7 @@ from django.urls import path, reverse
 from django.utils.safestring import mark_safe
 from rest_framework.authtoken.models import TokenProxy
 
-from .forms import IngredientImportForm
+from .forms import IngredientImportForm, RecipeAdminForm
 from .models import (
     Favorite,
     ImportIngredient,
@@ -78,13 +78,15 @@ class RecipeIngredientInline(admin.TabularInline):
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
+    form = RecipeAdminForm
     list_display = ('id', 'author', 'name', 'get_ingredients',
                     'get_tags', 'in_favorites', 'get_image')
-    fields = ('name', 'author', 'text', 'image',)
-    search_fields = ('name', 'author', 'tag')
-    list_filter = ('name', 'author', 'tag')
+    fields = ('name', 'author', 'text', 'image', 'tags')
+    search_fields = ('name', 'author', 'tags')
+    list_filter = ('name', 'author', 'tags')
     inlines = (RecipeIngredientInline,)
     empty_value_display = '- пусто -'
+    filter_horizontal = ("tags",)
 
     @admin.display(description='Изображение')
     def get_image(self, obj):
@@ -103,7 +105,7 @@ class RecipeAdmin(admin.ModelAdmin):
 
     @admin.display(description='Теги')
     def get_tags(self, obj):
-        ls = [_.name for _ in obj.tag.all()]
+        ls = [_.name for _ in obj.tags.all()]
         return ', '.join(ls)
 
 
