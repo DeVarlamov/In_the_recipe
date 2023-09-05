@@ -84,11 +84,3 @@ class SubscribedSerializer(UserSerializer):
         return RecipeSerializer(
             author_recipes, many=True
         ).data
-
-    def get_is_subscribed(self, obj):
-        """Метод получения подписок ."""
-        user = self.context.get('request').user
-        return (
-            user.is_authenticated
-            and obj.subscribing.filter(user=user).exists()
-        )

@@ -24,7 +24,7 @@ class UsersViewSet(UserViewSet):
         return self.get_paginated_response(
             SubscribedSerializer(
                 self.paginate_queryset(
-                    User.objects.filter(subscriber__user=request.user)
+                    User.objects.filter(subscribing__user=request.user)
                 ),
                 many=True,
                 context={'request': request},
