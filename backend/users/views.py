@@ -6,7 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from .models import Subscribed, User
-from .serializers import SubscribedSerializer
+from .serializers import SubscribedSerializer, UsersSerializer
 
 
 class UsersViewSet(UserViewSet):
@@ -14,7 +14,7 @@ class UsersViewSet(UserViewSet):
 
     queryset = User.objects.all()
     permission_classes = (AllowAny,)
-    serializer_class = UserDateSerializer
+    serializer_class = UsersSerializer
 
     @action(detail=False, methods=['get'],
             permission_classes=(IsAuthenticated,))

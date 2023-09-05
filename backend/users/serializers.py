@@ -21,32 +21,21 @@ class UserRegistrationSerializer(UserCreateSerializer):
                   )
 
 
-class SetPasswordSerializer(serializers.Serializer):
-    """Сереализатор изменение пароля пользователя."""
-    current_password = serializers.CharField()
-    new_password = serializers.CharField()
+class UsersSerializer(serializers.ModelSerializer):
+    """Сериализатор для всех пользователей."""
 
-    def validate(self, data):
-        try:
-            validate_password(data['new_password'])
-        except django_exceptions.ValidationError as e:
-            raise serializers.ValidationError(
-                {'new_password': list(e.messages)})
-        return data
+    is_subscribed = serializers.SerializerMethodField(read_only=True)
 
-    def update(self, instance, validated_data):
-        current_password = validated_data['current_password']
-        new_password = validated_data['new_password']
-        if not instance.check_password(current_password):
-            raise serializers.ValidationError(
-                {'current_password': 'Неправильный пароль.'})
-        if current_password == new_password:
-            raise serializers.ValidationError(
-                {'new_password': 'Новый пароль должен отличаться от текущего.',
-                 })
-        instance.set_password(new_password)
-        instance.save()
-        return validated_data
+    class Meta:
+        model = User
+        fields = ('id', 'email', 'username',
+                  'first_name', 'last_name', 'is_subscribed',)
+
+    def get_is_subscribed(self, author):
+        """Проверка подписки пользователей."""
+        request = self.context.get('request')
+        return (request and request.user.is_authenticated
+                and request.user.follower.filter(author=author).exists())
 
 
 class SubscribedSerializer(UserDateSerializer):
