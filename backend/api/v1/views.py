@@ -1,6 +1,5 @@
 from api.v1.filters import IngredientFilter, RecipeFilter
 from api.v1.utils import adding_deleting, create_shopping_cart_file
-from django.db import models
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -99,8 +98,7 @@ class RecipeViewSet(ModelViewSet):
         ).values(
             'ingredient__name', 'ingredient__measurement_unit'
         ).annotate(
-            total_amount=Sum('amount', output_field=models.DecimalField())
-        )
+            total_amount=Sum('amount'))
 
         content = create_shopping_cart_file(ingredients)
 
