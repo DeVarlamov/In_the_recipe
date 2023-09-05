@@ -28,8 +28,7 @@ from rest_framework.validators import UniqueTogetherValidator
 from users.models import User
 
 
-class UserDateSerializer(ModelSerializer):  # Продублировал код и за ошибки
-    """Сереалайзер данных юзера."""         # с цикличностью
+class UserDateSerializer(ModelSerializer):
 
     is_subscribed = SerializerMethodField()
 
