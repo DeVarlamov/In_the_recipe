@@ -79,10 +79,10 @@ class RecipeIngredientInline(admin.TabularInline):
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ('id', 'author', 'name', 'get_ingredients',
-                    'get_tags', 'in_favorites')
+                    'get_tags', 'in_favorites', 'get_image')
     fields = ('name', 'author', 'text', 'image',)
-    search_fields = ('name', 'author', 'tags')
-    list_filter = ('name', 'author', 'tags')
+    search_fields = ('name', 'author', 'tag')
+    list_filter = ('name', 'author', 'tag')
     inlines = (RecipeIngredientInline,)
     empty_value_display = '- пусто -'
 
@@ -103,7 +103,7 @@ class RecipeAdmin(admin.ModelAdmin):
 
     @admin.display(description='Теги')
     def get_tags(self, obj):
-        ls = [_.name for _ in obj.tags.all()]
+        ls = [_.name for _ in obj.tag.all()]
         return ', '.join(ls)
 
 

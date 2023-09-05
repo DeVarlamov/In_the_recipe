@@ -2,6 +2,11 @@ from colorfield.fields import ColorField
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from foodgram.constants import (
+    AMOUNTMAX,
+    AMOUNTMIN,
+    COLORERROR,
+    COOKETAMEMAX,
+    COOKETAMEMIN,
     DEFAULTCOLOR,
     DIRICTORYPATH,
     INGREDIENT_UNITS,
@@ -10,6 +15,9 @@ from foodgram.constants import (
     MAXIMUMCOUNT,
     MAXIMUMTIME,
     MINCOUNT,
+    NAMEERROR,
+    NAMEINGRERROR,
+    SLUGERROR,
 )
 from users.models import User
 
@@ -22,7 +30,7 @@ class Tag(models.Model):
         max_length=MAXIMUM_LENGTH,
         unique=True,
         error_messages={
-            'unique': 'Тег с таким названием уже существует.',
+            'unique': NAMEERROR,
         },
     )
     color = ColorField(
@@ -30,7 +38,7 @@ class Tag(models.Model):
         max_length=LENGTH_FOR_COLOR,
         unique=True,
         error_messages={
-            'unique': 'Такой цвет уже существует.',
+            'unique': COLORERROR,
         },
         default=DEFAULTCOLOR,
         null=True,
@@ -40,7 +48,7 @@ class Tag(models.Model):
         max_length=MAXIMUM_LENGTH,
         unique=True,
         error_messages={
-            'unique': 'Такой Slug уже существует.',
+            'unique': SLUGERROR,
         },
     )
 
@@ -60,7 +68,7 @@ class Ingredient(models.Model):
         max_length=MAXIMUM_LENGTH,
         db_index=True,
         error_messages={
-            'unique': 'Такой ингредиент уже есть.',
+            'unique': NAMEINGRERROR,
         },
     )
     measurement_unit = models.CharField(
@@ -121,11 +129,11 @@ class Recipe(models.Model):
         validators=[
             MinValueValidator(
                 MINCOUNT,
-                message='Время приготовления не может быть меньше 1'
+                message=COOKETAMEMIN
             ),
             MaxValueValidator(
                 MAXIMUMTIME,
-                message='Время приготовления не может быть больше 360'
+                message=COOKETAMEMAX
             )
         ],
     )
@@ -171,11 +179,11 @@ class RecipeIngredient(models.Model):
         validators=[
             MinValueValidator(
                 MINCOUNT,
-                message='Количество ингредиента не может быть нулевым'
+                message=AMOUNTMIN
             ),
             MaxValueValidator(
                 MAXIMUMCOUNT,
-                message='Количество ингредиента не может быть больше тысячи'
+                message=AMOUNTMAX
             )
         ],
     )

@@ -12,6 +12,19 @@ DIRICTORYPATH = 'recipe_img/'
 MAXIMUMTIME = 360
 FAVORITERECIPE = 'У вас уже есть это рецепт'
 SHOPINGLIST = 'Уже добавленно в карзину. Пора за покупочками'
+IMAGENOT = 'Поле image не может быть пустым.'
+NOTAVTORIZATION = 'Вы не авторизованы. Доступ запрещен.'
+NAMEERROR = 'Тег с таким названием уже существует.'
+COLORERROR = 'Такой цвет уже существует.'
+SLUGERROR = 'Такой Slug уже существует.'
+USERNAMEERROR = 'Пользователь с таким username уже существует.'
+EMAILERROR = 'e-mail уже занят.'
+NAMEINGRERROR = 'Такой ингредиент уже есть.'
+COOKETAMEMIN = 'Время приготовления не может быть меньше 1'
+COOKETAMEMAX = 'Время приготовления не может быть больше 360'
+AMOUNTMIN = 'Количество ингредиента не может быть нулевым'
+AMOUNTMAX = 'Количество ингредиента не может быть больше тысячи'
+
 
 INGREDIENT_UNITS = (
     ('г', 'граммы'),

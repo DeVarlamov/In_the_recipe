@@ -3,9 +3,11 @@ from django.shortcuts import get_object_or_404
 from drf_extra_fields.fields import Base64ImageField
 from foodgram.constants import (
     FAVORITERECIPE,
+    IMAGENOT,
     MAXIMUMCOUNT,
     MAXIMUMTIME,
     MINCOUNT,
+    NOTAVTORIZATION,
     SHOPINGLIST,
 )
 from recipes.models import (
@@ -181,11 +183,11 @@ class RecipeCreateSerializer(ModelSerializer):
         ingredients_data = validated_data.pop('ingredients', None)
         image = validated_data.get('image')
         if not image:
-            raise ValidationError("Поле image не может быть пустым.")
+            raise ValidationError(IMAGENOT)
 
         author = self.context.get('request').user
         if not author.is_authenticated:
-            raise PermissionDenied("Вы не авторизованы. Доступ запрещен.")
+            raise PermissionDenied(NOTAVTORIZATION)
 
         recipe = Recipe.objects.create(author=author, **validated_data)
         recipe.tags.set(tags_data)
