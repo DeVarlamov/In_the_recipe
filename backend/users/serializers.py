@@ -26,14 +26,20 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'email', 'username',
-                  'first_name', 'last_name', 'is_subscribed',)
+        fields = ('email',
+                  'id',
+                  'username',
+                  'first_name',
+                  'last_name',
+                  'is_subscribed',
+                  )
 
-    def get_is_subscribed(self, author):
-        """Проверка подписки пользователей."""
-        request = self.context.get('request')
-        return (request and request.user.is_authenticated
-                and request.user.follower.filter(author=author).exists())
+    def get_is_subscribed(self, obj):
+        user = self.context.get('request').user
+        return (
+            user.is_authenticated
+            and obj.subscribing.filter(user=user).exists()
+        )
 
 
 class SubscribedSerializer(UserDateSerializer):
