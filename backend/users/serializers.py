@@ -1,6 +1,4 @@
 from api.v1.serializers import RecipeSerializer, UserDateSerializer
-from django.contrib.auth.password_validation import validate_password
-from django.core import exceptions as django_exceptions
 from djoser.serializers import UserCreateSerializer
 from rest_framework import exceptions, serializers, status
 
@@ -21,7 +19,7 @@ class UserRegistrationSerializer(UserCreateSerializer):
                   )
 
 
-class UsersSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     """Сериализатор для всех пользователей."""
 
     is_subscribed = serializers.SerializerMethodField(read_only=True)

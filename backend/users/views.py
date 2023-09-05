@@ -1,4 +1,3 @@
-from api.v1.serializers import UserDateSerializer
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
 from rest_framework import response, status
@@ -6,7 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from .models import Subscribed, User
-from .serializers import SubscribedSerializer, UsersSerializer
+from .serializers import SubscribedSerializer, UserSerializer
 
 
 class UsersViewSet(UserViewSet):
@@ -14,7 +13,7 @@ class UsersViewSet(UserViewSet):
 
     queryset = User.objects.all()
     permission_classes = (AllowAny,)
-    serializer_class = UsersSerializer
+    serializer_class = UserSerializer
 
     @action(detail=False, methods=['get'],
             permission_classes=(IsAuthenticated,))
