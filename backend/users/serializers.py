@@ -1,5 +1,6 @@
 from djoser.serializers import UserCreateSerializer
 from rest_framework import exceptions, serializers, status
+from rest_framework.validators import UniqueTogetherValidator
 
 from api.v1.serializers import RecipeSerializer
 
@@ -47,7 +48,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class SubscribedSerializer(UserSerializer):
-    """Сереалайзер Подписок."""
+    """Сереалайзер Подписок. для GET запроса"""
 
     recipes = serializers.SerializerMethodField(
         method_name='get_recipes', read_only=True
@@ -68,22 +69,6 @@ class SubscribedSerializer(UserSerializer):
             'first_name',
         )
 
-    def validate(self, data):
-        """Валидация подписки."""
-        author = self.instance
-        user = self.context.get('request').user
-        if Subscribed.objects.filter(user=user, author=author).exists():
-            raise exceptions.ValidationError(
-                detail='Вы уже подписаны на этого пользователя!',
-                code=status.HTTP_400_BAD_REQUEST,
-            )
-        if user == author:
-            raise exceptions.ValidationError(
-                detail='Нельзя подписываться на себя',
-                code=status.HTTP_400_BAD_REQUEST,
-            )
-        return data
-
     def get_recipes_count(self, obj):
         """Метод получения колличества рецепта."""
         return obj.recipes.count()
@@ -100,3 +85,29 @@ class SubscribedSerializer(UserSerializer):
             raise ValueError('recipes_limit должен быть целым числом')
         author_recipes = object.recipes.all()[:limit]
         return RecipeSerializer(author_recipes, many=True).data
+
+
+class AddSubscribedSerializer(serializers.ModelSerializer):
+    """Сереалайзер добавления подписки"""
+
+    class Meta:
+        model = Subscribed
+        fields = ('user', 'author')
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Subscribed.objects.all(),
+                fields=['user', 'author'],
+                message="Вы уже подписались ны пользователя",
+            )
+        ]
+
+    def validate(self, attrs):
+        user = attrs.get('user')
+        author = attrs.get('author')
+
+        if user == author:
+            raise serializers.ValidationError(
+                "Вы не можете подписаться на самого себя"
+            )
+
+        return attrs
