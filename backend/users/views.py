@@ -57,5 +57,6 @@ class UsersViewSet(UserViewSet):
     @subscribe.mapping.delete
     def remove_from_subscribe(self, request, pk):
         """Метод удаления подписки"""
-        get_object_or_404(Subscribed, user=request.user, recipe=pk).delete
+        author = get_object_or_404(User, id=self.kwargs.get('id'))
+        get_object_or_404(Subscribed, author=author, user__id=pk).delete
         return Response(status=status.HTTP_204_NO_CONTENT)
