@@ -1,5 +1,5 @@
 from djoser.serializers import UserCreateSerializer
-from rest_framework import exceptions, serializers, status
+from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
 from api.v1.serializers import RecipeSerializer
