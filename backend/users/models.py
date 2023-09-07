@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from foodgram.constants import CHARACTER_LENGTH, EMAILERROR, USERNAMEERROR
+
+from foodgram.constants import CHARACTER_LENGTH, EMAIL_ERROR, USERNAME_ERROR
 from users.validate import validate_username
 
 
@@ -12,7 +13,7 @@ class User(AbstractUser):
         max_length=CHARACTER_LENGTH,
         unique=True,
         error_messages={
-            'unique': USERNAMEERROR,
+            'unique': USERNAME_ERROR,
         },
         help_text='введите username',
         validators=(validate_username,),
@@ -21,7 +22,7 @@ class User(AbstractUser):
         'Почта',
         unique=True,
         error_messages={
-            'unique': EMAILERROR,
+            'unique': EMAIL_ERROR,
         },
     )
     password = models.CharField('Пароль', max_length=CHARACTER_LENGTH)

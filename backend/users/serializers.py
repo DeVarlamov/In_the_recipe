@@ -1,6 +1,7 @@
-from api.v1.serializers import RecipeSerializer
 from djoser.serializers import UserCreateSerializer
 from rest_framework import exceptions, serializers, status
+
+from api.v1.serializers import RecipeSerializer
 
 from .models import Subscribed, User
 
@@ -35,8 +36,9 @@ class UserSerializer(serializers.ModelSerializer):
                   )
 
     def get_is_subscribed(self, obj):
+        """Метод получения подписки"""
         user = self.context.get('request').user
-        return (
+        return bool(
             user.is_authenticated
             and obj.subscribing.filter(user=user).exists()
         )
@@ -77,9 +79,11 @@ class SubscribedSerializer(UserSerializer):
 
     def get_recipes(self, object):
         """Метод получение рецепта."""
-        limit = int(self.context['request'].query_params.get(
-            'recipes_limit', default=0)
-        )
+        try:
+            limit = int(self.context['request'].query_params.get(
+                'recipes_limit', default=0))
+        except ValueError:
+            raise ValueError('recipes_limit должен быть целым числом')
         author_recipes = object.recipes.all()[:limit]
         return RecipeSerializer(
             author_recipes, many=True

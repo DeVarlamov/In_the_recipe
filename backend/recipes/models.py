@@ -1,23 +1,24 @@
 from colorfield.fields import ColorField
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+
 from foodgram.constants import (
-    AMOUNTMAX,
-    AMOUNTMIN,
-    COLORERROR,
-    COOKETAMEMAX,
-    COOKETAMEMIN,
-    DEFAULTCOLOR,
-    DIRICTORYPATH,
+    AMOUNT_MAX,
+    AMOUNT_MIN,
+    COLOR_ERROR,
+    COOKE_TAME_MAX,
+    COOKE_TAME_MIN,
+    DEFAULT_COLOR,
+    DIRICTORY_PATH,
     INGREDIENT_UNITS,
     LENGTH_FOR_COLOR,
+    MAXIMUM_COUNT,
     MAXIMUM_LENGTH,
-    MAXIMUMCOUNT,
     MAXIMUMTIME,
-    MINCOUNT,
-    NAMEERROR,
-    NAMEINGRERROR,
-    SLUGERROR,
+    MIN_COUNT,
+    NAME_ERROR,
+    NAME_INGRIDENT_RERROR,
+    SLUG_ERROR,
 )
 from users.models import User
 
@@ -30,7 +31,7 @@ class Tag(models.Model):
         max_length=MAXIMUM_LENGTH,
         unique=True,
         error_messages={
-            'unique': NAMEERROR,
+            'unique': NAME_ERROR,
         },
     )
     color = ColorField(
@@ -38,9 +39,9 @@ class Tag(models.Model):
         max_length=LENGTH_FOR_COLOR,
         unique=True,
         error_messages={
-            'unique': COLORERROR,
+            'unique': COLOR_ERROR,
         },
-        default=DEFAULTCOLOR,
+        default=DEFAULT_COLOR,
         null=True,
     )
     slug = models.SlugField(
@@ -48,7 +49,7 @@ class Tag(models.Model):
         max_length=MAXIMUM_LENGTH,
         unique=True,
         error_messages={
-            'unique': SLUGERROR,
+            'unique': SLUG_ERROR,
         },
     )
 
@@ -68,7 +69,7 @@ class Ingredient(models.Model):
         max_length=MAXIMUM_LENGTH,
         db_index=True,
         error_messages={
-            'unique': NAMEINGRERROR,
+            'unique': NAME_INGRIDENT_RERROR,
         },
     )
     measurement_unit = models.CharField(
@@ -114,7 +115,7 @@ class Recipe(models.Model):
     )
     image = models.ImageField(
         'Изображение блюда',
-        upload_to=DIRICTORYPATH,
+        upload_to=DIRICTORY_PATH,
     )
     name = models.CharField(
         'Название блюда',
@@ -125,15 +126,15 @@ class Recipe(models.Model):
     )
     cooking_time = models.PositiveSmallIntegerField(
         'Время приготовления, мин',
-        default=MINCOUNT,
+        default=MIN_COUNT,
         validators=[
             MinValueValidator(
-                MINCOUNT,
-                message=COOKETAMEMIN
+                MIN_COUNT,
+                message=COOKE_TAME_MIN
             ),
             MaxValueValidator(
                 MAXIMUMTIME,
-                message=COOKETAMEMAX
+                message=COOKE_TAME_MAX
             )
         ],
     )
@@ -175,15 +176,15 @@ class RecipeIngredient(models.Model):
     )
     amount = models.PositiveSmallIntegerField(
         'Количество',
-        default=MINCOUNT,
+        default=MIN_COUNT,
         validators=[
             MinValueValidator(
-                MINCOUNT,
-                message=AMOUNTMIN
+                MIN_COUNT,
+                message=AMOUNT_MIN
             ),
             MaxValueValidator(
-                MAXIMUMCOUNT,
-                message=AMOUNTMAX
+                MAXIMUM_COUNT,
+                message=AMOUNT_MAX
             )
         ],
     )

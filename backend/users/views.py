@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
 from rest_framework import response, status
 from rest_framework.decorators import action
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from .models import Subscribed, User
@@ -14,6 +15,8 @@ class UsersViewSet(UserViewSet):
     queryset = User.objects.all()
     permission_classes = (AllowAny,)
     serializer_class = UserSerializer
+    pagination_class = LimitOffsetPagination
+    pagination_class.default_limit = 3
 
     @action(detail=False, methods=['get'],
             permission_classes=(IsAuthenticated,))
@@ -31,8 +34,6 @@ class UsersViewSet(UserViewSet):
             ).data
         )
 
-    @action(detail=True, methods=['post', 'delete'],
-            permission_classes=(IsAuthenticated,))
     def subscribe(self, request, **kwargs):
         """Подписываем / отписываемся на пользователя.
         Доступно только авторизованным пользователям.
@@ -45,8 +46,9 @@ class UsersViewSet(UserViewSet):
                                               data=request.data,
                                               context={'request': request})
             serializer.is_valid(raise_exception=True)
-            Subscribed.objects.create(user=user, author=author)
+            serializer.save()
             return response.Response(serializer.data,
                                      status=status.HTTP_201_CREATED)
-        get_object_or_404(Subscribed, user=user, author=author).delete()
+        subscribed = get_object_or_404(Subscribed, user=user, author=author)
+        subscribed.delete()
         return response.Response(status=status.HTTP_204_NO_CONTENT)

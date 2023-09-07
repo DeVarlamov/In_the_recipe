@@ -6,5 +6,5 @@ extend-exclude = 'tests|migrations'
 [tool.isort]
 profile = "black"
 line_length = 79
-src_paths = ["api_yamdb"]
+src_paths = ["backend"]
 extend_skip = ["tests", "migrations"]
