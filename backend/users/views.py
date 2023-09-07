@@ -36,16 +36,22 @@ class UsersViewSet(UserViewSet):
         )
 
     @action(
-        detail=True, methods=['post'], permission_classes=[IsAuthenticated]
+        detail=True, methods=['post'], permission_classes=(IsAuthenticated,)
     )
     def subscribe(self, request, **kwargs):
-        """Подписываем на пользователя."""
-        author = self.get_object()
+        """Подписываем / отписываемся на пользователя.
+        Доступно только авторизованным пользователям.
+        """
+        user = request.user
+        author_id = self.kwargs.get('id')
+        author = get_object_or_404(User, id=author_id)
         serializer = SubscribedSerializer(
             author, data=request.data, context={'request': request}
         )
         serializer.is_valid(raise_exception=True)
-        serializer.save(user=request.user, author=author)
+        Subscribed.objects.create(user=user, author=author)
+        # serializer.save(user=user, author=author)
+
         return response.Response(
             serializer.data, status=status.HTTP_201_CREATED
         )
