@@ -17,11 +17,12 @@ class IngredientImportForm(ModelForm):
 
 class RecipeAdminForm(ModelForm):
     """Форма для админки рецептов"""
+
     tags = ModelMultipleChoiceField(
         queryset=Tag.objects.all(),
         widget=CheckboxSelectMultiple,
         required=False,
-        label=("Tags")
+        label=("Tags"),
     )
 
     class Meta:

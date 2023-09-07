@@ -64,6 +64,7 @@ class Tag(models.Model):
 
 class Ingredient(models.Model):
     """Модель ингредиент"""
+
     name = models.CharField(
         'Название',
         max_length=MAXIMUM_LENGTH,
@@ -84,8 +85,7 @@ class Ingredient(models.Model):
         verbose_name_plural = "ингредиенты"
         constraints = [
             models.UniqueConstraint(
-                fields=['name', 'measurement_unit'],
-                name='unique_ingredients'
+                fields=['name', 'measurement_unit'], name='unique_ingredients'
             )
         ]
 
@@ -128,14 +128,8 @@ class Recipe(models.Model):
         'Время приготовления, мин',
         default=MIN_COUNT,
         validators=[
-            MinValueValidator(
-                MIN_COUNT,
-                message=COOKE_TAME_MIN
-            ),
-            MaxValueValidator(
-                MAXIMUMTIME,
-                message=COOKE_TAME_MAX
-            )
+            MinValueValidator(MIN_COUNT, message=COOKE_TAME_MIN),
+            MaxValueValidator(MAXIMUMTIME, message=COOKE_TAME_MAX),
         ],
     )
     author = models.ForeignKey(
@@ -145,8 +139,7 @@ class Recipe(models.Model):
         verbose_name='Автор рецепта',
     )
     pub_date = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name='Дата публикации'
+        auto_now_add=True, verbose_name='Дата публикации'
     )
 
     class Meta:
@@ -159,33 +152,28 @@ class Recipe(models.Model):
 
 
 class RecipeIngredient(models.Model):
-    """ Модель связывает Recipe и Ingredient с
+    """Модель связывает Recipe и Ingredient с
     указанием количества ингредиентов.
     """
+
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
         related_name='recipes',
-        verbose_name='Рецепт'
+        verbose_name='Рецепт',
     )
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
         related_name='ingredients',
-        verbose_name='Ингредиенты'
+        verbose_name='Ингредиенты',
     )
     amount = models.PositiveSmallIntegerField(
         'Количество',
         default=MIN_COUNT,
         validators=[
-            MinValueValidator(
-                MIN_COUNT,
-                message=AMOUNT_MIN
-            ),
-            MaxValueValidator(
-                MAXIMUM_COUNT,
-                message=AMOUNT_MAX
-            )
+            MinValueValidator(MIN_COUNT, message=AMOUNT_MIN),
+            MaxValueValidator(MAXIMUM_COUNT, message=AMOUNT_MAX),
         ],
     )
 
@@ -195,8 +183,7 @@ class RecipeIngredient(models.Model):
         verbose_name_plural = 'Ингредиенты в рецептах'
         constraints = [
             models.UniqueConstraint(
-                fields=['recipe', 'ingredient'],
-                name='unique_combination'
+                fields=['recipe', 'ingredient'], name='unique_combination'
             )
         ]
 
@@ -206,15 +193,12 @@ class RecipeIngredient(models.Model):
 
 class UserRelation(models.Model):
     """Связь подписок"""
+
     user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        verbose_name='Пользователь'
+        User, on_delete=models.CASCADE, verbose_name='Пользователь'
     )
     recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        verbose_name='Рецепт'
+        Recipe, on_delete=models.CASCADE, verbose_name='Рецепт'
     )
 
     class Meta:
@@ -222,8 +206,7 @@ class UserRelation(models.Model):
         abstract = True
         constraints = [
             models.UniqueConstraint(
-                fields=['user', 'recipe'],
-                name='unique_%(class)s'
+                fields=['user', 'recipe'], name='unique_%(class)s'
             )
         ]
 

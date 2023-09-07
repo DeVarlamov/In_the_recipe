@@ -23,6 +23,7 @@ from .models import (
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     """Админка Тегов"""
+
     model = Tag
     prepopulated_fields = {'slug': ('name',)}
     list_display = ('name', 'color', 'slug')
@@ -38,6 +39,7 @@ class ImportIngredient(admin.ModelAdmin):
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
     """Админка ингридиентов и импорт-CSV"""
+
     model = Ingredient
     list_display = ('pk', 'name', 'measurement_unit')
     search_fields = ('name', 'measurement_unit')
@@ -52,17 +54,20 @@ class IngredientAdmin(admin.ModelAdmin):
             form = IngredientImportForm(request.POST, request.FILES)
             if form.is_valid():
                 form_object = form.save()
-                with open(form_object.csv_file.path,
-                          encoding='utf-8') as csv_file:
+                with open(
+                    form_object.csv_file.path, encoding='utf-8'
+                ) as csv_file:
                     rows = csv.reader(csv_file, delimiter=',')
                     if next(rows) != ['name', 'measurement_unit']:
                         messages.warning(request, 'Неверные заголовки у файла')
                         return HttpResponseRedirect(request.path_info)
                     Ingredient.objects.bulk_create(
-                        Ingredient(name=row[0],
-                                   measurement_unit=row[1],
-                                   )
-                        for row in rows)
+                        Ingredient(
+                            name=row[0],
+                            measurement_unit=row[1],
+                        )
+                        for row in rows
+                    )
                 url = reverse('admin:index')
                 messages.success(request, 'Файл успешно импортирован')
                 return HttpResponseRedirect(url)
@@ -79,8 +84,15 @@ class RecipeIngredientInline(admin.TabularInline):
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     form = RecipeAdminForm
-    list_display = ('id', 'author', 'name', 'get_ingredients',
-                    'get_tags', 'in_favorites', 'get_image')
+    list_display = (
+        'id',
+        'author',
+        'name',
+        'get_ingredients',
+        'get_tags',
+        'in_favorites',
+        'get_image',
+    )
     fields = ('name', 'author', 'text', 'image', 'tags')
     search_fields = ('name', 'author', 'tags')
     list_filter = ('name', 'author', 'tags')

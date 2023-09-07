@@ -19,8 +19,9 @@ class UsersViewSet(UserViewSet):
     pagination_class = LimitOffsetPagination
     pagination_class.default_limit = 3
 
-    @action(detail=False, methods=['get'],
-            permission_classes=(IsAuthenticated,))
+    @action(
+        detail=False, methods=['get'], permission_classes=(IsAuthenticated,)
+    )
     def subscriptions(self, request):
         """Возвращает пользователей, на которых подписан текущий пользователь.
         В выдачу добавляются рецепты.
@@ -35,21 +36,23 @@ class UsersViewSet(UserViewSet):
             ).data
         )
 
-    @action(detail=True, methods=['post'],
-            permission_classes=(IsAuthenticated,))
+    @action(
+        detail=True, methods=['post'], permission_classes=(IsAuthenticated,)
+    )
     def subscribe(self, request, **kwargs):
         """Подписываем  на пользователя.
         Доступно только авторизованным пользователям.
         """
         author_id = self.kwargs.get('id')
         author = get_object_or_404(User, id=author_id)
-        serializer = SubscribedSerializer(author,
-                                          data=request.data,
-                                          context={'request': request})
+        serializer = SubscribedSerializer(
+            author, data=request.data, context={'request': request}
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return response.Response(serializer.data,
-                                 status=status.HTTP_201_CREATED)
+        return response.Response(
+            serializer.data, status=status.HTTP_201_CREATED
+        )
 
     @subscribe.mapping.delete
     def remove_from_subscribe(self, request, pk):

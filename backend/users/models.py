@@ -67,9 +67,11 @@ class Subscribed(models.Model):
         ordering = ['-id']
         constraints = [
             models.UniqueConstraint(
-                fields=['user', 'author'],
-                name='unique_subscribe')]
+                fields=['user', 'author'], name='unique_subscribe'
+            )
+        ]
 
     def __str__(self):
-        return (f'Пользователь  {self.user}'
-                f' подписался на автора {self.author}')
+        return (
+            f'Пользователь  {self.user}' f' подписался на автора {self.author}'
+        )

@@ -62,7 +62,7 @@ class RecipeViewSet(ModelViewSet):
     """Вью сет для рецептов."""
 
     queryset = Recipe.objects.all()
-    permission_classes = ((IsAuthorOrReadOnly, ))
+    permission_classes = (IsAuthorOrReadOnly,)
     pagination_class = LimitOffsetPagination
     pagination_class.default_limit = 3
     filter_backends = [DjangoFilterBackend]
@@ -80,13 +80,13 @@ class RecipeViewSet(ModelViewSet):
     def adding_recipe(add_serializer, model, request, recipe_id):
         """Кастомный метод добавления рецепта."""
         user = request.user
-        data = {'user': user.id,
-                'recipe': recipe_id}
+        data = {'user': user.id, 'recipe': recipe_id}
         serializer = add_serializer(data=data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return response.Response(serializer.data,
-                                 status=status.HTTP_201_CREATED)
+        return response.Response(
+            serializer.data, status=status.HTTP_201_CREATED
+        )
 
     @staticmethod
     def create_shopping_cart_file(self, request, ingredients):
@@ -98,12 +98,14 @@ class RecipeViewSet(ModelViewSet):
             f'Список покупок для пользователя: {user.username}\n\n'
             f'Дата: {today:%Y-%m-%d}\n\n'
         )
-        shopping_list += '\n'.join([
-            f'- {ingredient["ingredient__name"]} '
-            f'({ingredient["ingredient__measurement_unit"]})'
-            f' - {ingredient["amount"]}'
-            for ingredient in ingredients
-            ])
+        shopping_list += '\n'.join(
+            [
+                f'- {ingredient["ingredient__name"]} '
+                f'({ingredient["ingredient__measurement_unit"]})'
+                f' - {ingredient["amount"]}'
+                for ingredient in ingredients
+            ]
+        )
         shopping_list += f'\n\nFoodgram ({today:%Y})'
         response = HttpResponse(
             shopping_list, content_type='text.txt; charset=utf-8'
@@ -111,12 +113,12 @@ class RecipeViewSet(ModelViewSet):
         response['Content-Disposition'] = f'attachment; filename={filename}'
         return response
 
-    @action(detail=True, methods=['post'],
-            permission_classes=(IsAuthenticated,))
+    @action(
+        detail=True, methods=['post'], permission_classes=(IsAuthenticated,)
+    )
     def favorite(self, request, pk):
         """Метод создания избраного"""
-        return self.adding_recipe(
-            FavoriteSerializer, Favorite, request, pk)
+        return self.adding_recipe(FavoriteSerializer, Favorite, request, pk)
 
     @favorite.mapping.delete
     def remove_from_favorite(self, request, pk):
@@ -124,9 +126,12 @@ class RecipeViewSet(ModelViewSet):
         get_object_or_404(Favorite, user=request.user, recipe=pk).delete
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True, methods=['post'],
-            permission_classes=(IsAuthenticated,),
-            pagination_class=None)
+    @action(
+        detail=True,
+        methods=['post'],
+        permission_classes=(IsAuthenticated,),
+        pagination_class=None,
+    )
     def shopping_cart(self, request, pk):
         """Метод добавления рецепта в корзину"""
         return self.adding_recipe(
@@ -139,14 +144,17 @@ class RecipeViewSet(ModelViewSet):
         get_object_or_404(ShoppingСart, user=request.user, recipe=pk).delete
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=False, methods=['get'],
-            permission_classes=(IsAuthenticated,))
+    @action(
+        detail=False, methods=['get'], permission_classes=(IsAuthenticated,)
+    )
     def download_shopping_cart(self, request):
         """Метод получения списка покупок"""
-        ingredients = RecipeIngredient.objects.filter(
-            recipe__shoppingcart__user=self.request.user
-        ).values(
-            'ingredient__name',
-            'ingredient__measurement_unit'
-        ).order_by('ingredient__name').annotate(amount=Sum('amount'))
+        ingredients = (
+            RecipeIngredient.objects.filter(
+                recipe__shoppingcart__user=self.request.user
+            )
+            .values('ingredient__name', 'ingredient__measurement_unit')
+            .order_by('ingredient__name')
+            .annotate(amount=Sum('amount'))
+        )
         return self.create_shopping_cart_file(self, request, ingredients)
