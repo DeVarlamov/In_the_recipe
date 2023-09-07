@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
+from requests import Response
 from rest_framework import response, status
 from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
@@ -34,21 +35,24 @@ class UsersViewSet(UserViewSet):
             ).data
         )
 
+    @action(detail=True, methods=['post'],
+            permission_classes=(IsAuthenticated,))
     def subscribe(self, request, **kwargs):
-        """Подписываем / отписываемся на пользователя.
+        """Подписываем  на пользователя.
         Доступно только авторизованным пользователям.
         """
-        user = request.user
         author_id = self.kwargs.get('id')
         author = get_object_or_404(User, id=author_id)
-        if request.method == 'POST':
-            serializer = SubscribedSerializer(author,
-                                              data=request.data,
-                                              context={'request': request})
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return response.Response(serializer.data,
-                                     status=status.HTTP_201_CREATED)
-        subscribed = get_object_or_404(Subscribed, user=user, author=author)
-        subscribed.delete()
-        return response.Response(status=status.HTTP_204_NO_CONTENT)
+        serializer = SubscribedSerializer(author,
+                                          data=request.data,
+                                          context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return response.Response(serializer.data,
+                                 status=status.HTTP_201_CREATED)
+
+    @subscribe.mapping.delete
+    def remove_from_subscribe(self, request, pk):
+        """Метод удаления подписки"""
+        get_object_or_404(Subscribed, user=request.user, recipe=pk).delete
+        return Response(status=status.HTTP_204_NO_CONTENT)
