@@ -2,6 +2,10 @@
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'leningradSabakaRU')
@@ -12,7 +16,7 @@ ALLOWED_HOSTS = os.getenv(
     'ALLOWED_HOSTS', default='127.0.0.1,localhost'
 ).split(',')
 
-USE_SQLITE = os.getenv('USE_DB', default=False)
+USE_SQLITE = os.getenv('USE_DB', 'False') == 'True'
 
 
 INSTALLED_APPS = [

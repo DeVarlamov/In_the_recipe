@@ -1,14 +1,11 @@
 from datetime import datetime as dt
-from urllib import response
 
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django_filters.rest_framework import DjangoFilterBackend
-from requests import Response
-from rest_framework import status
+from rest_framework import response, status
 from rest_framework.decorators import action
-from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
@@ -22,6 +19,7 @@ from recipes.models import (
     ShoppingСart,
     Tag,
 )
+from users.pagination import LimitPageNumberPagination
 
 from .permission import IsAuthorOrReadOnly
 from .serializers import (
@@ -63,10 +61,9 @@ class RecipeViewSet(ModelViewSet):
 
     queryset = Recipe.objects.all()
     permission_classes = (IsAuthorOrReadOnly,)
-    pagination_class = LimitOffsetPagination
-    pagination_class.default_limit = 3
     filter_backends = [DjangoFilterBackend]
     filterset_class = RecipeFilter
+    pagination_class = LimitPageNumberPagination
 
     def get_serializer_class(self):
         """Метод определения сереолайзера"""
@@ -78,7 +75,7 @@ class RecipeViewSet(ModelViewSet):
 
     @staticmethod
     def adding_recipe(add_serializer, model, request, recipe_id):
-        """Кастомный метод добавления рецепта."""
+        """Кастомный метод добавления и удаления рецепта."""
         user = request.user
         data = {'user': user.id, 'recipe': recipe_id}
         serializer = add_serializer(data=data, context={'request': request})
@@ -117,14 +114,15 @@ class RecipeViewSet(ModelViewSet):
         detail=True, methods=['post'], permission_classes=(IsAuthenticated,)
     )
     def favorite(self, request, pk):
-        """Метод создания избраного"""
         return self.adding_recipe(FavoriteSerializer, Favorite, request, pk)
 
     @favorite.mapping.delete
     def remove_from_favorite(self, request, pk):
         """Метод удаления избраного"""
-        get_object_or_404(Favorite, user=request.user, recipe=pk).delete
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        get_object_or_404(Favorite, user=request.user, recipe=pk).delete()
+        return response.Response(
+            {'detail': 'Избранное удалено'}, status=status.HTTP_204_NO_CONTENT
+        )
 
     @action(
         detail=True,
@@ -141,8 +139,8 @@ class RecipeViewSet(ModelViewSet):
     @shopping_cart.mapping.delete
     def remove_from_shopping_cart(self, request, pk):
         """Метод удаления из корзины"""
-        get_object_or_404(ShoppingСart, user=request.user, recipe=pk).delete
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        get_object_or_404(ShoppingСart, user=request.user, recipe=pk).delete()
+        return response.Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=False, methods=['get'], permission_classes=(IsAuthenticated,)
