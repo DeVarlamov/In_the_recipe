@@ -10,7 +10,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from api.v1.filters import IngredientFilter, RecipeFilter
-from foodgram.constants import FILE_NAME
+from foodgram.constants import FAVORITE_RECIPE_DELETE, FILE_NAME
 from recipes.models import (
     Favorite,
     Ingredient,
@@ -70,8 +70,7 @@ class RecipeViewSet(ModelViewSet):
 
         if self.action in ('list', 'retrieve'):
             return RecipeListSerializer
-        else:
-            return RecipeCreateSerializer
+        return RecipeCreateSerializer
 
     @staticmethod
     def adding_recipe(add_serializer, model, request, recipe_id):
@@ -121,7 +120,8 @@ class RecipeViewSet(ModelViewSet):
         """Метод удаления избраного"""
         get_object_or_404(Favorite, user=request.user, recipe=pk).delete()
         return response.Response(
-            {'detail': 'Избранное удалено'}, status=status.HTTP_204_NO_CONTENT
+            {'detail': FAVORITE_RECIPE_DELETE},
+            status=status.HTTP_204_NO_CONTENT,
         )
 
     @action(

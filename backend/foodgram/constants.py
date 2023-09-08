@@ -27,6 +27,11 @@ NONE_INGREDIENTS = 'Необходимо указать ингредиенты'
 NONE_TEGS = 'Необходимо указать теги'
 IDENTICAL_INGREDIENTS = 'Ингредиенты не должны повторяться'
 IDENTICAL_TAGS = 'Теги не должны повторяться'
+FAVORITE_RECIPE_DELETE = 'Рецепт успешно удален из избраного'
+SUBCRIDE_DELETE = 'Успешная отписка'
+LIMIT_RECIPE = 'recipes_limit должен быть целым числом'
+ADD_SUBSCRIDED_UNIQUE = "Вы уже подписались на этого пользователя"
+ADD_SUBSCRIDED_VALIDATE = "Вы не можете подписаться на самого себя"
 
 INGREDIENT_UNITS = (
     ('г', 'граммы'),
