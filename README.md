@@ -9,7 +9,8 @@
 - Проект завернут в Docker-контейнеры;
 - Образы foodgram_frontend и foodgram_backend запушены на DockerHub;
 - Реализован workflow c автодеплоем на удаленный сервер и отправкой сообщения в Telegram;
-- Проект ранее был развернут на сервере: <https://myfoodgramnym.hopto.org/recipes>
+- Проект был развернут на сервере: <https://myfoodgramnym.hopto.org/recipes>
+- Админка проекта <https://myfoodgramnym.hopto.org/admin/>
 
 ### Развертывание на локальном сервере
 
